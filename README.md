@@ -4,13 +4,13 @@ Flight Booking Application
 
 ## Installation
 
-Make sure to have pyenv installed on your machine
+- Make sure to have pyenv and virtualenv installed on your machine
 
-Install the pyenv-virtualenv plugin by running `git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv`
+- Install the pyenv-virtualenv plugin by running `git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv`
 
-Restart your terminal
+- Restart your terminal
 
-intialize pyenv-virtualenv
+- intialize pyenv-virtualenv
 
 ```shell
 eval "$(pyenv virtualenv-init -)"
@@ -19,8 +19,8 @@ eval "$(pyenv virtualenv-init -)"
 ### Modify Python Environment Using Virtual Env and Install Project Dependencies
 
 - `pyenv virtualenv {PYTHON_VERSION_NEEDED} {VIRTUAL_ENV_NAME}`
-  > `{PYTHON_VERSION_NEEDED}` would be the version of python you want (just the version number)
-  > `{VIRTUAL_ENV_NAME}` would be the name and directory for your virtual environment
+  >- `{PYTHON_VERSION_NEEDED}` would be the version of python you want (just the version number)
+  >- `{VIRTUAL_ENV_NAME}` would be the name and directory for your virtual environment
   e.g `pyenv virtualenv 3.6.6 env` would use python 3.6.6 in a virtual env directory named `env`
 
 - `pyenv activate {VIRTUAL_ENV_NAME}` - `{VIRTUAL_ENV_NAME}` would be the name of your particular virtual environment specified before
