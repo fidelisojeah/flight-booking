@@ -5,6 +5,7 @@ Flight Booking Application
 
 ### In a Development Environment
 
+
 Before you install:
 
 Ensure you have MySQL up and running on your computer and create a new database schema and new user with a password and login
