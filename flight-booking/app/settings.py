@@ -26,7 +26,7 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
-environ.Env.read_env()
+environ.Env.read_env('.env')
 
 # False if not in os.environ
 DEBUG = env('DEBUG')
@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'app',
 ]
 
 MIDDLEWARE = [
@@ -85,8 +87,14 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'mysql.connector.django',
+        'HOST': env('MYSQL_DB_HOST'),
+        'USER': env('MYSQL_USER'),
+        'NAME': env('MYSQL_DATABASE'),
+        'PASSWORD': env('MYSQL_PASSWORD'),
+        'OPTIONS': {
+            'autocommit': True,
+        },
     }
 }
 
