@@ -1,0 +1,33 @@
+version: '3.1'
+
+services:
+  database:
+    image: percona/percona-server:5.7
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    restart: always
+    volumes:
+      - './infrastructure/data/db/mysql:/var/lib/mysql'
+
+  django-app:
+    build: './flight-booking'
+    command: python manage.py runserver 0.0.0.0:8000
+    restart: always
+    ports:
+      - '8000:8000'
+    environment:
+      - DJANGO_MANAGEPY_MIGRATE=on
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_DB_HOST=database
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - DEBUG=${APP_DEBUG}
+      - SECRET_KEY=${APP_SECRET_KEY}
+    depends_on:
+      - database

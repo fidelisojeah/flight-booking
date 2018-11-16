@@ -1,44 +1,80 @@
 # flight-booking
 Flight Booking Application
 
+## Installation and configuration
 
-## Installation
+### In a Development Environment
 
-- Make sure to have pyenv and virtualenv installed on your machine
 
-- Install the pyenv-virtualenv plugin by running `git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv`
+Before you install:
 
-- Restart your terminal
+Ensure you have MySQL up and running on your computer and create a new database schema and new user with a password and login
+> The Name of the database, user and password must be consitient with what is used in your [environment variables]  (in-a-development-environment)
 
-- intialize pyenv-virtualenv
+For Installation in a development environment, check the docs at [Flight-booking Installation in a development environment](flight-booking/in-a-development-environment)
 
-```shell
-eval "$(pyenv virtualenv-init -)"
+
+### In a Production Environment
+
+- You need docker installed on your machine
+
+- Set up Environment Variables
+
+> Below are environment variables needed for the application
+
+```env
+APP_SECRET_KEY
+MYSQL_DATABASE
+MYSQL_ROOT_PASSWORD
+MYSQL_USER
+MYSQL_PASSWORD
 ```
 
-### Modify Python Environment Using Virtual Env and Install Project Dependencies
+- run with docker
 
-- `pyenv virtualenv {PYTHON_VERSION_NEEDED} {VIRTUAL_ENV_NAME}`
-  >- `{PYTHON_VERSION_NEEDED}` would be the version of python you want (just the version number)
-  >- `{VIRTUAL_ENV_NAME}` would be the name and directory for your virtual environment
-  e.g `pyenv virtualenv 3.6.6 env` would use python 3.6.6 in a virtual env directory named `env`
+```bash
+docker-compose up --build
+```
 
-- `pyenv activate {VIRTUAL_ENV_NAME}` - `{VIRTUAL_ENV_NAME}` would be the name of your particular virtual environment specified before
-  > e.g `pyenv activate env`
+## Runnning
 
-- `pip install -r requirements.txt`
+To run the application:
 
-### Add environment Variables
-You could either:
-- Create a `.env` file and store the environment variables in it
-- Export the individual environment variables before running the application
+### In a development environment
 
-In either case, environment variables needed are located in the `.env.sample` file
+- create a `.env` file in the [flight-booking](flight-booking) directory
+> the root directory of main python application: manage.py can be found here
 
-## Running
+- add the following environment environment variables:
 
-- activate python environment
-  > `pyenv activate {VIRTUAL_ENV_NAME}` again `{VIRTUAL_ENV_NAME}` would be the name used during [installation](#modify-python-environment-using-virtual-env-and-install-project-dependencies)
-  
-- run django server
-  > `python manage.py runserver`
+```env
+DEBUG=on
+SECRET
+MYSQL_USER
+MYSQL_DATABASE
+MYSQL_PASSWORD
+MYSQL_DB_HOST
+```
+
+> Sample of these can be found in the [example](flight-booking/.env.sample)
+
+- Run any pending migrations:
+
+```bash
+python manage.py migrate
+```
+
+- Start the server
+
+```bash
+python manage.py runserver
+```
+
+
+### To test the application
+
+Simply run python tests
+
+```bash
+python manage.py test
+```
