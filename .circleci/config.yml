@@ -34,7 +34,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            . venv/bin/activate
+            source venv/bin/activate
             python manage.py test --with-xunit --xunit-file=reports/results.xml
 
       - store_test_results:
