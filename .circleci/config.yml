@@ -37,7 +37,7 @@ jobs:
             . venv/bin/activate
             python manage.py test --with-xunit --xunit-file=reports/results.xml
 
-          - store_test_results:
+      - store_test_results:
           path: reports
 
       - store_artifacts:
