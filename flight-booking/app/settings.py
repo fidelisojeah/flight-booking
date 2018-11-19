@@ -84,7 +84,8 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-if TESTING:
+IS_TEST = len(sys.argv) > 1 and sys.argv[1] == 'test'
+if IS_TEST:
 
     DATABASES = {
         'default': {
