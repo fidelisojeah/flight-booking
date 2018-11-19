@@ -84,19 +84,29 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
+if TESTING:
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'mysql.connector.django',
-        'HOST': env('MYSQL_DB_HOST'),
-        'USER': env('MYSQL_USER'),
-        'NAME': env('MYSQL_DATABASE'),
-        'PASSWORD': env('MYSQL_PASSWORD'),
-        'OPTIONS': {
-            'autocommit': True,
-        },
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+            'TEST_NAME': ':memory:',
+        }
     }
-}
+    DEBUG = False
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'mysql.connector.django',
+            'HOST': env('MYSQL_DB_HOST'),
+            'USER': env('MYSQL_USER'),
+            'NAME': env('MYSQL_DATABASE'),
+            'PASSWORD': env('MYSQL_PASSWORD'),
+            'OPTIONS': {
+                'autocommit': True,
+            },
+        }
+    }
 
 
 # Password validation
