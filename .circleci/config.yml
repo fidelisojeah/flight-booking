@@ -23,7 +23,7 @@ jobs:
           name: Install dependencies
           command: |
             python3 -m venv venv
-            . venv/bin/activate
+            source venv/bin/activate
             pip install -r requirements.txt
 
       - save_cache:
@@ -34,11 +34,12 @@ jobs:
       - run:
           name: Run tests
           command: |
-            . venv/bin/activate
-            python manage.py test --with-xunit --xunit-file=reports/results.xml
+            source venv/bin/activate
+            python manage.py test
 
-          - store_test_results:
-          path: reports
+      - store_test_results:
+          path: test-results
 
       - store_artifacts:
-          path: reports
+          path: test-results
+          destination: tr1

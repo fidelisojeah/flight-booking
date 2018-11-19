@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import sys
 import environ
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -84,19 +85,30 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
+IS_TEST = len(sys.argv) > 1 and sys.argv[1] == 'test'
+if IS_TEST:
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'mysql.connector.django',
-        'HOST': env('MYSQL_DB_HOST'),
-        'USER': env('MYSQL_USER'),
-        'NAME': env('MYSQL_DATABASE'),
-        'PASSWORD': env('MYSQL_PASSWORD'),
-        'OPTIONS': {
-            'autocommit': True,
-        },
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+            'TEST_NAME': ':memory:',
+        }
     }
-}
+    DEBUG = False
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'mysql.connector.django',
+            'HOST': env('MYSQL_DB_HOST'),
+            'USER': env('MYSQL_USER'),
+            'NAME': env('MYSQL_DATABASE'),
+            'PASSWORD': env('MYSQL_PASSWORD'),
+            'OPTIONS': {
+                'autocommit': True,
+            },
+        }
+    }
 
 
 # Password validation
@@ -136,3 +148,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+TEST_RUNNER = 'xmlrunner.extra.djangotestrunner.XMLTestRunner'
+TEST_OUTPUT_VERBOSE = 2
+TEST_OUTPUT_DIR = 'test-results'
