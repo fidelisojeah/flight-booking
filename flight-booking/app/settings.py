@@ -49,7 +49,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'app',
+    'rest_framework',
+    'django_nose',
+
+    'app.accounts',
+    'app.helpers',
 ]
 
 MIDDLEWARE = [
@@ -63,6 +67,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'app.urls'
+
+REST_FRAMEWORK = {
+    # When you enable API versioning, the request.version attribute will contain a string
+    # that corresponds to the version requested in the incoming client request.
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
+}
 
 TEMPLATES = [
     {
@@ -128,7 +138,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
@@ -149,6 +164,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-TEST_RUNNER = 'xmlrunner.extra.djangotestrunner.XMLTestRunner'
-TEST_OUTPUT_VERBOSE = 2
-TEST_OUTPUT_DIR = 'test-results'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+    '--verbosity=2',
+    '--cover-erase',
+    '--with-xunit',
+    '--xunit-file=xunittest.xml',
+    '--with-coverage',
+    '--cover-package=app',
+    '--cover-inclusive',
+]

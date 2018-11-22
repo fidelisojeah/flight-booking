@@ -13,3 +13,18 @@ if __name__ == '__main__':
             "forget to activate a virtual environment?"
         ) from exc
     execute_from_command_line(sys.argv)
+
+if is_testing:
+    import coverage
+    cov = coverage.coverage(source=['app'], omit=['*/tests/*'])
+    cov.set_option('report:show_missing', True)
+    cov.erase()
+    cov.start()
+# Add this 5 line above
+execute_from_command_line(sys.argv)
+# and add this 4 line below
+if is_testing:
+    cov.stop()
+    cov.save()
+    cov.html_report(directory='covhtml')
+    cov.report()

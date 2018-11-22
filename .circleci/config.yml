@@ -38,8 +38,8 @@ jobs:
             python manage.py test
 
       - store_test_results:
-          path: test-results
+          path: ./
 
       - store_artifacts:
-          path: test-results
+          path: ./
           destination: tr1
