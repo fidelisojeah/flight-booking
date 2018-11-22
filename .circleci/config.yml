@@ -41,5 +41,5 @@ jobs:
           path: ./
 
       - store_artifacts:
-          path: ./
+          path: ./xunittest.xml
           destination: tr1
