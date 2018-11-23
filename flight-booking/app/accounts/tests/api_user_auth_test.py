@@ -32,8 +32,12 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('email'),
-            'email required'
+            response.data.get('errors').get('email')['message'],
+            'This field is required.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('email')['type'],
+            'required'
         )
 
     def test_create_user_username_not_sent(self):
@@ -49,8 +53,12 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('username'),
-            'username required'
+            response.data.get('errors').get('username')['message'],
+            'This field is required.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('username')['type'],
+            'required'
         )
 
     def test_create_user_password_not_sent(self):
@@ -63,11 +71,14 @@ class AccountsTestExceptions(AccountsTest):
             reverse('accounts-create-user', kwargs={"version": "v1"}),
             data
         )
-
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('password'),
-            'password required'
+            response.data.get('errors').get('password')['message'],
+            'This field is required.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('password')['type'],
+            'required'
         )
 
     def test_create_user_multiple_fields_not_sent(self):
@@ -85,12 +96,20 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('password'),
-            'password required'
+            response.data.get('errors').get('password')['message'],
+            'This field is required.'
         )
         self.assertEqual(
-            response.data.get('email'),
-            'email required'
+            response.data.get('errors').get('password')['type'],
+            'required'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('email')['message'],
+            'This field is required.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('email')['type'],
+            'required'
         )
 
     def test_create_user_email_already_exists(self):
@@ -106,8 +125,12 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('email'),
-            'email has already been taken'
+            response.data.get('errors').get('email')['message'],
+            'This field must be unique.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('email')['type'],
+            'unique'
         )
 
     def test_create_user_username_already_exists(self):
@@ -123,8 +146,12 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('username'),
-            'username has already been taken'
+            response.data.get('errors').get('username')['message'],
+            'This field must be unique.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('username')['type'],
+            'unique'
         )
 
     def test_create_user_email_username_already_exists(self):
@@ -141,12 +168,20 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('username'),
-            'username has already been taken'
+            response.data.get('errors').get('username')['message'],
+            'This field must be unique.'
         )
         self.assertEqual(
-            response.data.get('email'),
-            'email has already been taken'
+            response.data.get('errors').get('username')['type'],
+            'unique'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('email')['message'],
+            'This field must be unique.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('email')['type'],
+            'unique'
         )
 
     def test_create_user_password_too_short(self):
@@ -162,8 +197,12 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('password'),
-            'min_length requirement failed'
+            response.data.get('errors').get('password')['message'],
+            'Ensure this field has at least 8 characters.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('password')['type'],
+            'min_length'
         )
 
     def test_create_user_password_no_uppercase(self):
@@ -181,8 +220,12 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('password'),
+            response.data.get('errors').get('password')['message'],
             'Must have at least 1 uppercase, 1 lowercase, 1 number and 1 special character'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('password')['type'],
+            'invalid'
         )
 
     def test_create_user_password_no_lowercase(self):
@@ -200,8 +243,12 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('password'),
+            response.data.get('errors').get('password')['message'],
             'Must have at least 1 uppercase, 1 lowercase, 1 number and 1 special character'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('password')['type'],
+            'invalid'
         )
 
     def test_create_user_password_no_number(self):
@@ -219,12 +266,16 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('password'),
+            response.data.get('errors').get('password')['message'],
             'Must have at least 1 uppercase, 1 lowercase, 1 number and 1 special character'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('password')['type'],
+            'invalid'
         )
 
     def test_create_user_password_no_special_character(self):
-        '''Create a new User - Invalid :- When the does not match policy -
+        '''Create a new User - Invalid :- When the password does not match policy -
         Password does not contain special character
         '''
         data = self.valid_data.copy()
@@ -238,8 +289,34 @@ class AccountsTestExceptions(AccountsTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data.get('password'),
+            response.data.get('errors').get('password')['message'],
             'Must have at least 1 uppercase, 1 lowercase, 1 number and 1 special character'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('password')['type'],
+            'invalid'
+        )
+
+    def test_create_user_email_invalid_type(self):
+        '''Create a new User - Invalid :- When the email is not of valid type
+        '''
+        data = self.valid_data.copy()
+
+        data['email'] = 'testuser'
+
+        response = self.client.post(
+            reverse('accounts-create-user', kwargs={"version": "v1"}),
+            data
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data.get('errors').get('email')['message'],
+            'Enter a valid email address.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('email')['type'],
+            'invalid'
         )
 
 
@@ -253,6 +330,6 @@ class AccountsTestValid(AccountsTest):
             reverse('accounts-create-user', kwargs={"version": "v1"}),
             data
         )
-
+        print(response.data,'<<<<>>\n\n')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertFalse('password' in response.data)
+        self.assertFalse('errors' in response.data)

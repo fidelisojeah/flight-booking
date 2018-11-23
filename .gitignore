@@ -106,3 +106,4 @@ venv.bak/
 infrastructure/data/*
 
 xunittest.xml
+.DS_Store
