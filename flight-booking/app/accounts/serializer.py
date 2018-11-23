@@ -32,18 +32,19 @@ class UserAuthSerializer(serializers.ModelSerializer):
             'last_name',
         )
 
-    def validate_email(self, email):
-        '''Validate email is a real one'''
-        if re.search(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+[a-zA-Z0-9]+$)'):
-            return email
-        return serializers.ValidationError(
-            'Email address not valid'
-        )
+    # Should not be neccessary since field is emailField
+    # def validate_email(self, email):
+    #     '''Validate email is a real one'''
+    #     if re.search(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+[a-zA-Z0-9]+$)'):
+    #         return email
+    #     return serializers.ValidationError(
+    #         'Email address not valid'
+    #     )
 
     def validate_password(self, password):
         '''Validate password matches condition'''
-        if re.search(r'(^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$_!%*?&]{8,}$)'):
+        if re.search(r'(^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$_!%*?&]{8,}$)', password) is not None:
             return password
-        return serializers.ValidationError(
+        raise serializers.ValidationError(
             'Must have at least 1 uppercase, 1 lowercase, 1 number and 1 special character'
         )

@@ -5,7 +5,9 @@ from rest_framework import (
     decorators
 )
 
-from . import serializer
+from . import (
+    services as accounts_services
+)
 
 
 # Create your views here.
@@ -15,4 +17,7 @@ class UserAuthViewSet(ViewSet):
     '''
     @decorators.action(detail=False, methods=['post'])
     def create_user(self, request, **kwargs):
-        pass
+        return Response(
+            accounts_services.create_new_user(data=request.data),
+            status=status.HTTP_201_CREATED
+        )
