@@ -2,18 +2,32 @@ from rest_framework import (
     views,
     exceptions
 )
+from . import utils
 
 
 def handle_exceptions(exc, context):
     '''
     Custom exception handler for Django Rest Framework that adds
-    the `status_code` to the response and adds a message that an error has occured and spreads validation errors.
+    the `status_code` to the response and adds a message
+    that an error has occured and spreads validation errors.
     '''
     response = views.exception_handler(exc, context)
 
-    errors = {}
+    if isinstance(exc, utils.FieldErrorExceptions):
+        errors = exc.detail
+    else:
+
+        if hasattr(exc, 'detail'):
+            errors = {
+                'global': str(exc.detail)
+            }
+        else:
+            errors = {
+                'global': str(exc)
+            }
 
     if isinstance(exc, exceptions.ValidationError):
+        errors.pop('global', None)
         for key, value in exc.detail.items():
             if isinstance(value, list):
                 errors[key] = {
@@ -23,7 +37,7 @@ def handle_exceptions(exc, context):
             else:
                 errors[key] = {
                     'message': str(value),
-                    'type': ''
+                    'type': value.code
                 }
 
     if response is not None:
@@ -32,6 +46,7 @@ def handle_exceptions(exc, context):
         response.data['errors'] = {
             **errors
         }
-        response.data['message'] = 'An error has occured'
+        response.data['message'] = 'An error has occured.'
+        response.data['success'] = False
 
     return response

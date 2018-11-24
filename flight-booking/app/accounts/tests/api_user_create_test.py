@@ -11,6 +11,8 @@ class AccountsTest(APITestCase):
         )
         self.valid_data = {
             'username': 'seconduser',
+            'first_name': 'Example',
+            'last_name': 'User',
             'email': 'seconduser@example.com',
             'password': 'SecondUserValidatedPassword123$@46'
         }
@@ -39,6 +41,7 @@ class AccountsTestExceptions(AccountsTest):
             response.data.get('errors').get('email')['type'],
             'required'
         )
+        self.assertFalse(response.data.get('success'))
 
     def test_create_user_username_not_sent(self):
         '''Create a new User - Invalid :- When the username not passed'''
@@ -50,6 +53,8 @@ class AccountsTestExceptions(AccountsTest):
             reverse('accounts-create-user', kwargs={"version": "v1"}),
             data
         )
+
+        self.assertFalse(response.data.get('success'))
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -71,6 +76,9 @@ class AccountsTestExceptions(AccountsTest):
             reverse('accounts-create-user', kwargs={"version": "v1"}),
             data
         )
+
+        self.assertFalse(response.data.get('success'))
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data.get('errors').get('password')['message'],
@@ -82,18 +90,21 @@ class AccountsTestExceptions(AccountsTest):
         )
 
     def test_create_user_multiple_fields_not_sent(self):
-        '''Create a new User - Invalid :- When the password not passed'''
+        '''Create a new User - Invalid :-
+        When the password, email and firstname are not passed'''
         data = self.valid_data.copy()
 
         data.pop('email')
 
         data.pop('password')
+        data.pop('first_name')
 
         response = self.client.post(
             reverse('accounts-create-user', kwargs={"version": "v1"}),
             data
         )
 
+        self.assertFalse(response.data.get('success'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data.get('errors').get('password')['message'],
@@ -101,6 +112,14 @@ class AccountsTestExceptions(AccountsTest):
         )
         self.assertEqual(
             response.data.get('errors').get('password')['type'],
+            'required'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('first_name')['message'],
+            'This field is required.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('first_name')['type'],
             'required'
         )
         self.assertEqual(
@@ -113,7 +132,9 @@ class AccountsTestExceptions(AccountsTest):
         )
 
     def test_create_user_email_already_exists(self):
-        '''Create a new User - Invalid :- When the email has already been used before'''
+        '''Create a new User - Invalid :-
+        When the email has already been used before
+        '''
         data = self.valid_data.copy()
 
         data['email'] = self.initial_user.email
@@ -122,6 +143,8 @@ class AccountsTestExceptions(AccountsTest):
             reverse('accounts-create-user', kwargs={"version": "v1"}),
             data
         )
+
+        self.assertFalse(response.data.get('success'))
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -134,7 +157,9 @@ class AccountsTestExceptions(AccountsTest):
         )
 
     def test_create_user_username_already_exists(self):
-        '''Create a new User - Invalid :- When the username has already been used before'''
+        '''Create a new User - Invalid :-
+        When the username has already been used before
+        '''
         data = self.valid_data.copy()
 
         data['username'] = self.initial_user.username
@@ -144,6 +169,7 @@ class AccountsTestExceptions(AccountsTest):
             data
         )
 
+        self.assertFalse(response.data.get('success'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data.get('errors').get('username')['message'],
@@ -155,7 +181,9 @@ class AccountsTestExceptions(AccountsTest):
         )
 
     def test_create_user_email_username_already_exists(self):
-        '''Create a new User - Invalid :- When the username and email have already been used before'''
+        '''Create a new User - Invalid :-
+        When the username and email have already been used before
+        '''
         data = self.valid_data.copy()
 
         data['username'] = self.initial_user.username
@@ -166,6 +194,7 @@ class AccountsTestExceptions(AccountsTest):
             data
         )
 
+        self.assertFalse(response.data.get('success'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data.get('errors').get('username')['message'],
@@ -185,7 +214,9 @@ class AccountsTestExceptions(AccountsTest):
         )
 
     def test_create_user_password_too_short(self):
-        '''Create a new User - Invalid :- When the does not match policy - Password too short'''
+        '''Create a new User - Invalid :-
+        When the does not match policy - Password too short
+        '''
         data = self.valid_data.copy()
 
         data['password'] = 'short'
@@ -194,6 +225,8 @@ class AccountsTestExceptions(AccountsTest):
             reverse('accounts-create-user', kwargs={"version": "v1"}),
             data
         )
+
+        self.assertFalse(response.data.get('success'))
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -218,6 +251,7 @@ class AccountsTestExceptions(AccountsTest):
             data
         )
 
+        self.assertFalse(response.data.get('success'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data.get('errors').get('password')['message'],
@@ -241,6 +275,7 @@ class AccountsTestExceptions(AccountsTest):
             data
         )
 
+        self.assertFalse(response.data.get('success'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data.get('errors').get('password')['message'],
@@ -264,6 +299,7 @@ class AccountsTestExceptions(AccountsTest):
             data
         )
 
+        self.assertFalse(response.data.get('success'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data.get('errors').get('password')['message'],
@@ -287,6 +323,7 @@ class AccountsTestExceptions(AccountsTest):
             data
         )
 
+        self.assertFalse(response.data.get('success'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data.get('errors').get('password')['message'],
@@ -309,6 +346,7 @@ class AccountsTestExceptions(AccountsTest):
             data
         )
 
+        self.assertFalse(response.data.get('success'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data.get('errors').get('email')['message'],
@@ -318,6 +356,31 @@ class AccountsTestExceptions(AccountsTest):
             response.data.get('errors').get('email')['type'],
             'invalid'
         )
+        self.assertEqual(response.data.get('message'), 'An error has occured.')
+
+    def test_create_user_username_invalid_type(self):
+        '''Create a new User - Invalid :- When the username is not of valid type
+        '''
+        data = self.valid_data.copy()
+
+        data['username'] = 'test user@12'  # username has space, and @
+
+        response = self.client.post(
+            reverse('accounts-create-user', kwargs={"version": "v1"}),
+            data
+        )
+
+        self.assertFalse(response.data.get('success'))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data.get('errors').get('username')['message'],
+            'Username can only contain alphanumeric characters and . or _.'
+        )
+        self.assertEqual(
+            response.data.get('errors').get('username')['type'],
+            'invalid'
+        )
+        self.assertEqual(response.data.get('message'), 'An error has occured.')
 
 
 class AccountsTestValid(AccountsTest):
@@ -330,6 +393,20 @@ class AccountsTestValid(AccountsTest):
             reverse('accounts-create-user', kwargs={"version": "v1"}),
             data
         )
-        print(response.data,'<<<<>>\n\n')
+
+        self.assertTrue(response.data.get('success'))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertFalse('errors' in response.data)
+        self.assertEqual(
+            response.data.get('message'),
+            'User Account Created Successfully.'
+        )
+        self.assertNotContains(
+            response, 'errors', status_code=status.HTTP_201_CREATED)
+
+        self.assertNotContains(response, 'password',
+                               status_code=status.HTTP_201_CREATED)
+        self.assertEqual(
+            response.data.get('payload')['username'],
+            data['username']
+        )
+        self.assertEqual(response.data.get('payload')['email'], data['email'])

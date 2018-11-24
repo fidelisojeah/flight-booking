@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+
+    'corsheaders',
     'django_nose',
 
     'app.accounts',
@@ -57,6 +59,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -69,11 +72,17 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'app.urls'
 
 REST_FRAMEWORK = {
-    # When you enable API versioning, the request.version attribute will contain a string
-    # that corresponds to the version requested in the incoming client request.
+    # When you enable API versioning, the request.version attribute will
+    # contain a string that corresponds to the version requested in the
+    # incoming client request.
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'EXCEPTION_HANDLER': 'app.helpers.exceptions.handle_exceptions',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
 }
 
 TEMPLATES = [
@@ -177,3 +186,25 @@ NOSE_ARGS = [
     '--cover-package=app',
     '--cover-inclusive',
 ]
+
+JWT_AUTH = {
+    'JWT_ENCODE_HANDLER':
+    'rest_framework_jwt.utils.jwt_encode_handler',
+
+    'JWT_DECODE_HANDLER':
+    'rest_framework_jwt.utils.jwt_decode_handler',
+
+    'JWT_PAYLOAD_HANDLER':
+    'rest_framework_jwt.utils.jwt_payload_handler',
+
+    'JWT_PAYLOAD_GET_USER_ID_HANDLER':
+    'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+
+    'JWT_RESPONSE_PAYLOAD_HANDLER':
+    'rest_framework_jwt.utils.jwt_response_payload_handler',
+
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_AUTH_COOKIE': 'flight-booking',
+    'JWT_ALLOW_REFRESH': True
+
+}
