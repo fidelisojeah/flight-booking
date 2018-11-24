@@ -9,6 +9,9 @@ from app.accounts.serializer import(
 
 
 class FieldErrorExceptions(exceptions.APIException):
+    '''
+    Custom Exception of missing fields
+    '''
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = 'invalid'
     default_detail = 'Fields Missing.'
