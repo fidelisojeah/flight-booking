@@ -35,7 +35,15 @@ jobs:
           name: Run tests
           command: |
             source venv/bin/activate
-            python manage.py test
+            mkdir -p test-results
+            python manage.py test --xunit-file=test-results/xunittest.xml
+
+      - run:
+          name: Get Coverage
+          command: |
+            source venv/bin/activate
+            coverage report
+            coverage html -d test-results
 
       - store_test_results:
           path: test-results
@@ -43,3 +51,4 @@ jobs:
       - store_artifacts:
           path: test-results
           destination: tr1
+
