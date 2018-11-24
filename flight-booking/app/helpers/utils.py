@@ -48,7 +48,7 @@ def validate_fields_present(data, *args, **kwargs):
 
 def jwt_response_payload_handler(token, user=None, request=None):
     '''custom jwt response payload including user details'''
-        return {
-            'token': token,
-            'user': UserSerializer(user, context={'request': request}).data
-        }
+    return {
+        'token': token,
+        'user': UserSerializer(user, context={'request': request}).data
+    }
