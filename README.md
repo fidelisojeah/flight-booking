@@ -1,4 +1,6 @@
 # flight-booking
+
+[![CircleCI](https://circleci.com/gh/fidelisojeah/flight-booking.svg?style=svg)](https://circleci.com/gh/fidelisojeah/flight-booking)
 Flight Booking Application
 
 ## Installation and configuration
