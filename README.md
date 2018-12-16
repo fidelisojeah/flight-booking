@@ -1,10 +1,11 @@
 # flight-booking
+
+[![CircleCI](https://circleci.com/gh/fidelisojeah/flight-booking.svg?style=svg)](https://circleci.com/gh/fidelisojeah/flight-booking)
 Flight Booking Application
 
 ## Installation and configuration
 
 ### In a Development Environment
-
 
 Before you install:
 
@@ -12,7 +13,6 @@ Ensure you have MySQL up and running on your computer and create a new database 
 > The Name of the database, user and password must be consitient with what is used in your [environment variables]  (in-a-development-environment)
 
 For Installation in a development environment, check the docs at [Flight-booking Installation in a development environment](flight-booking)
-
 
 ### In a Production Environment
 
