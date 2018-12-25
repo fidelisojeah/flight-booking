@@ -22,4 +22,4 @@ ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 RUN ["chmod", "+x", "/app/docker-entrypoint.sh"]
 
-CMD ["gunicorn app.wsgi --bind 0.0.0.0:8000"]
+CMD ["gunicorn /app/app.wsgi --bind 0.0.0.0:8000"]
