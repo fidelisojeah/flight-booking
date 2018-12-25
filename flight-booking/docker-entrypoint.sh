@@ -1,10 +1,10 @@
 #!/bin/sh
 
-while ! mysqladmin ping -h database --silent; do
+while ! mysqladmin ping -h $MYSQL_DB_HOST --silent; do
 >&2 echo "Waiting for Mysql server - sleeping"
     sleep 1
 done
-mysqladmin ping -h database
+mysqladmin ping -h $MYSQL_DB_HOST
 
 >&2 echo "MySQL Up and running"
 
