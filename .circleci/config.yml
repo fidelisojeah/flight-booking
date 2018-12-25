@@ -63,8 +63,8 @@ jobs:
           name: Build and deploy docker image
           command: |
             docker login --username=$HEROKU_LOGIN --password=$HEROKU_API_KEY registry.heroku.com
-            docker build -t registry.heroku.com/flight-booking-lms/web .
-            docker push registry.heroku.com/flight-booking-lms/web:latest
+            docker build -t registry.heroku.com/flight-booking-lms/release .
+            docker push registry.heroku.com/flight-booking-lms/release:latest
 
 workflows:
   version: 2
