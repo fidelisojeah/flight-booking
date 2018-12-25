@@ -107,3 +107,5 @@ infrastructure/data/*
 
 xunittest.xml
 .DS_Store
+
+.vscode/settings.json

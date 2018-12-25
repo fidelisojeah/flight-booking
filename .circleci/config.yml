@@ -1,7 +1,7 @@
 
 version: 2
 jobs:
-  build:
+  test:
     working_directory: ~/repo/flight-booking
     docker:
       - image: circleci/python:3.7.0
@@ -52,3 +52,62 @@ jobs:
           path: test-results
           destination: tr1
 
+  deploy:
+    working_directory: ~/repo/flight-booking
+    docker:
+      - image: circleci/python:3.7.0
+        environment:
+          DEBUG: off
+          SECRET: $SECRET
+          MYSQL_DATABASE: $MYSQL_DATABASE
+          MYSQL_DB_HOST: $MYSQL_HOST
+          MYSQL_USER: $MYSQL_USER
+          MYSQL_PASSWORD: $MYSQL_PASSWORD
+
+    steps:
+      - checkout:
+          path: ~/repo
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run:
+          name: Install dependencies
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install -r requirements.txt
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      - run:
+          name: Migrate
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+            python3 manage.py migrate
+
+      - run:
+          name: Build and deploy docker image
+          command:
+            - docker login --email=$HEROKU_LOGIN --username=$HEROKU_LOGIN --password=$HEROKU_API_KEY registry.heroku.com
+            - docker build -t registry.heroku.com/flight-booking-lms/web .
+            - docker push registry.heroku.com/flight-booking-lms/web:latest
+
+workflows:
+  version: 2
+  test-build-deploy:
+    jobs:
+      - test
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
