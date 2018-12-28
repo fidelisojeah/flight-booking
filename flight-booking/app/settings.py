@@ -215,5 +215,5 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True
 
 }
-
-django_heroku.settings(locals())
+if not IS_TEST:
+    django_heroku.settings(locals())
