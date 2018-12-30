@@ -16,4 +16,4 @@ WORKDIR /app
 
 COPY . /app
 
-RUN python manage.py upload-default-image
+CMD ["python manage.py upload-default-image"]
