@@ -2,10 +2,14 @@ from django.contrib.auth.models import User
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
+from unittest.mock import patch
 
 
 class AuthTest(APITestCase):
     def setUp(self):
+        self.cloudinary_patcher = patch('cloudinary')
+        self.mock_cloudinary = self.cloudinary_patcher.start()
+
         self.user = User.objects.create_user(
             email='test@example.com', password='testuserpassword',
             username='testuser',
@@ -18,6 +22,7 @@ class AuthTest(APITestCase):
         }
 
     def tearDown(self):
+        self.cloudinary_patcher.stop()
         self.user.delete()
 
 
