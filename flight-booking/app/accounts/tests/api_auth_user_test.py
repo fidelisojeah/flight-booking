@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 class AuthTest(APITestCase):
     def setUp(self):
-        self.cloudinary_patcher = patch('cloudinary')
+        self.cloudinary_patcher = patch('cloudinary.utils.cloudinary_url')
         self.mock_cloudinary = self.cloudinary_patcher.start()
 
         self.user = User.objects.create_user(
