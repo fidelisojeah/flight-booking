@@ -5,9 +5,26 @@ from rest_framework import (
 )
 from django.contrib.auth.models import User
 
+from .models import Accounts
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    picture_url = serializers.CharField(source='get_profile_picture_url')
+
+    class Meta:
+        model = Accounts
+        fields = (
+            'id',
+            'picture_url'
+        )
+
 
 class UserSerializer(serializers.ModelSerializer):
     '''UserSerializer - to Validate User Sign Up'''
+    account = AccountSerializer(
+        source='accounts_account',
+        read_only=True
+    )
     email = serializers.EmailField(
         required=True,
         validators=[validators.UniqueValidator(queryset=User.objects.all())]
@@ -32,6 +49,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id',
+            'account',
             'email',
             'password',
             'username',
@@ -67,5 +85,13 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
         user.set_password(validated_data['password'])
+
         user.save()
+
+        account = Accounts.objects.create(
+            user=user,
+            profile_picture_public_id='profiles/default'
+        )
+        account.save()
+
         return user

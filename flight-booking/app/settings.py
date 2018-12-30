@@ -58,11 +58,14 @@ INSTALLED_APPS = [
 
     'rest_framework',
 
+    'cloudinary',
+
     'corsheaders',
     'django_nose',
 
     'app.accounts',
     'app.helpers',
+    'app.uploads',
 ]
 
 MIDDLEWARE = [

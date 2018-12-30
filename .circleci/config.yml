@@ -59,6 +59,7 @@ jobs:
     steps:
       - checkout:
           path: ~/repo
+
       - run:
           name: Build and deploy docker image
           command: |
@@ -67,8 +68,12 @@ jobs:
             docker push registry.heroku.com/$HEROKU_APP_NAME/web:latest
             docker inspect registry.heroku.com/$HEROKU_APP_NAME/web --format={{.Id}} > WEB_DOCKER_IMAGE_ID_FILE
             export WEB_DOCKER_IMAGE_ID=$(cat WEB_DOCKER_IMAGE_ID_FILE)
+            docker build -t registry.heroku.com/$HEROKU_APP_NAME/release . -f Dockerfile.release
+            docker push registry.heroku.com/$HEROKU_APP_NAME/release:latest
+            docker inspect registry.heroku.com/$HEROKU_APP_NAME/release --format={{.Id}} > RELEASE_DOCKER_IMAGE_ID_FILE
+            export RELEASE_DOCKER_IMAGE_ID=$(cat RELEASE_DOCKER_IMAGE_ID_FILE)
             curl -n -X PATCH https://api.heroku.com/apps/$HEROKU_APP_NAME/formation \
-            -d "{ \"updates\": [ { \"type\": \"web\", \"docker_image\": \"${WEB_DOCKER_IMAGE_ID}\" }]}" -H "Content-Type: application/json" \
+            -d "{ \"updates\": [ { \"type\": \"web\", \"docker_image\": \"${WEB_DOCKER_IMAGE_ID}\" }, {\"type\": \"release\", \"docker_image\": \"${RELEASE_DOCKER_IMAGE_ID}\" }]}" -H "Content-Type: application/json" \
             -H "Accept: application/vnd.heroku+json; version=3.docker-releases" \
             -H "Authorization: Bearer $HEROKU_API_KEY"
 
@@ -80,6 +85,6 @@ workflows:
       - deploy:
           requires:
             - test
-          filters:
-            branches:
-              only: master
+          # filters:
+          #   branches:
+          #     only: master
