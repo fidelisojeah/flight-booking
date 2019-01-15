@@ -2,7 +2,7 @@ import uuid
 from django.contrib.auth.models import User
 from django.db import models
 
-from app.uploads.services import UNSAFE_default_pic_details
+from app.uploads.services import default_pic_details
 
 
 class Accounts(models.Model):
@@ -30,5 +30,5 @@ class Accounts(models.Model):
 
     def get_profile_picture_url(self):
         if not self.profile_picture_url or self.profile_picture_public_id == 'profiles/default':
-            return UNSAFE_default_pic_details()
+            return default_pic_details()
         return self.profile_picture_url

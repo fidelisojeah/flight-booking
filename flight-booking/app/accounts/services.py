@@ -65,3 +65,16 @@ def authenticate_user(request, *, data):
     raise exceptions.NotAuthenticated(
         'Unable to log in with provided credentials.'
     )
+
+
+def update_profile_picture(requestor, *, profile_id, data):
+    '''Upload/Edit Profile Picture'''
+    if requestor.has_perm('accounts.update_any_picture'):
+        pass
+    elif requestor.has_perm('accounts.update_own_picture'):
+        if requestor.profile.id != profile_id:
+            raise exceptions.PermissionDenied('Insufficient Permission.')
+    else:
+        raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    file_object = data.get('file')

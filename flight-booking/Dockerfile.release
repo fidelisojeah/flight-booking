@@ -1,6 +1,6 @@
 FROM python:3.7.0
 
-RUN apt-get update && apt-get install -y mysql-client && rm -rf /var/lib/apt
+RUN apt-get update && rm -rf /var/lib/apt
 
 ENV PYTHONUNBUFFERED 1
 
