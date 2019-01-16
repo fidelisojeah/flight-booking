@@ -6,6 +6,10 @@ jobs:
     docker:
       - image: circleci/python:3.7.0
       - image: rabbitmq:latest
+          environment:
+            RABBITMQ_DEFAULT_USER: $RABBITMQ_DEFAULT_USER
+            RABBITMQ_DEFAULT_PASS: $RABBITMQ_DEFAULT_PASS
+            RABBITMQ_DEFAULT_VHOST: $RABBITMQ_DEFAULT_VHOST
       - image: redis:5.0.3
         environment:
           DEBUG: on
