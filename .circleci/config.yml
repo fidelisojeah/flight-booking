@@ -19,10 +19,6 @@ jobs:
           - v1-dependencies-{{ checksum "requirements.txt" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
-      - run:
-          name: Start CELERY
-          command: celery -A app worker -l info
-          background: true
 
       - run:
           name: Install dependencies
@@ -30,6 +26,13 @@ jobs:
             python3 -m venv venv
             source venv/bin/activate
             pip install -r requirements.txt
+
+      - run:
+          name: Start CELERY
+          command: |
+          source venv/bin/activate
+          celery -A app worker -l info
+          background: true
 
       - save_cache:
           paths:
