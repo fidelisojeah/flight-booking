@@ -118,9 +118,9 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-IS_TEST = len(sys.argv) > 1 and sys.argv[1] == 'test'
+IS_TEST = (len(sys.argv) > 1 and sys.argv[1] == 'test') or env(
+    'CIRCLECI', default=False)
 if IS_TEST:
-
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
