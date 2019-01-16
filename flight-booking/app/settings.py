@@ -229,11 +229,11 @@ CELERY_ACKS_LATE = True
 CELERY_TASK_PUBLISH_RETRY = True
 CELERY_DISABLE_RATE_LIMITS = False
 
-CELERY_BROKER_URL = env('CELERY_BROKER_URL')
-if not CELERY_BROKER_URL:
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default=None)
+if CELERY_BROKER_URL is None:
     CELERY_BROKER_URL = 'amqp://{user}:{password}@{hostname}/{vhost}/'.format(
-        user=env('RABBIT_ENV_USER', default='admin'),
-        password=env('RABBIT_ENV_RABBITMQ_PASS', default='mypass'),
+        user=env('RABBIT_ENV_USER', default='guest'),
+        password=env('RABBIT_ENV_RABBITMQ_PASS', default='guest'),
         hostname=env('RABBIT_HOSTNAME', default='localhost'),
         vhost=env('RABBIT_ENV_VHOST', default=''))
 
