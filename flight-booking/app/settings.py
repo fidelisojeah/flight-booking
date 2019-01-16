@@ -56,10 +56,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_celery_beat',
+    'django_celery_results',
+
     'rest_framework',
 
     'corsheaders',
     'django_nose',
+
+    'app',
 
     'app.accounts',
     'app.helpers',
@@ -113,9 +118,9 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-IS_TEST = len(sys.argv) > 1 and sys.argv[1] == 'test'
+IS_TEST = (len(sys.argv) > 1 and sys.argv[1] == 'test') or env(
+    'CIRCLECI', default=False)
 if IS_TEST:
-
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -215,5 +220,29 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True
 
 }
+
+CELERY_TIMEZONE = env('CELERY_TIMEZONE', default='UTC')
+CELERY_TASK_SERIALIZER = env('CELERY_TASK_SERIALIZER', default='json')
+CELERY_RESULT_SERIALIZER = env('CELERY_RESULT_SERIALIZER', default='json')
+CELERY_ACCEPT_CONTENT = ['json', 'application/text']
+CELERY_ACKS_LATE = True
+CELERY_TASK_PUBLISH_RETRY = True
+CELERY_DISABLE_RATE_LIMITS = False
+
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default=None)
+if CELERY_BROKER_URL is None:
+    CELERY_BROKER_URL = 'amqp://{user}:{password}@{hostname}/{vhost}/'.format(
+        user=env('RABBIT_ENV_USER', default='guest'),
+        password=env('RABBIT_ENV_RABBITMQ_PASS', default='guest'),
+        hostname=env('RABBIT_HOSTNAME', default='localhost'),
+        vhost=env('RABBIT_ENV_VHOST', default=''))
+
+# add heartbeat
+BROKER_HEARTBEAT = '?heartbeat=30'
+if not CELERY_BROKER_URL.endswith(BROKER_HEARTBEAT):
+    CELERY_BROKER_URL += BROKER_HEARTBEAT
+
+CELERY_RESULT_BACKEND = env('REDIS_URL', default='rpc://')
+
 if not IS_TEST:
     django_heroku.settings(locals())

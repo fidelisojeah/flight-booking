@@ -1,10 +1,20 @@
 version: '3.1'
 
 services:
+  broker:
+    image: rabbitmq:latest
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+  redis-server:
+    image: redis:latest
   database:
     image: percona/percona-server:5.7
-    ports:
-      - '3306:3306'
+    # ports:
+    #   - '3306:3306'
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -29,5 +39,25 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - DEBUG=${APP_DEBUG}
       - SECRET_KEY=${APP_SECRET_KEY}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CELERY_ACCEPT_CONTENT=${CELERY_ACCEPT_CONTENT}
+      - CELERY_TASK_SERIALIZER=${CELERY_TASK_SERIALIZER}
+      - CELERY_RESULT_SERIALIZER=${CELERY_RESULT_SERIALIZER}
+      - CELERY_TIMEZONE=${CELERY_TIMEZONE}
     depends_on:
       - database
+      - broker
+
+  celery:
+    build: './flight-booking'
+    command: celery -A app worker -l info
+    depends_on:
+      - db
+      - broker
+  celery-beat:
+    build: './flight-booking'
+    command: celery -A app beat -l info
+    depends_on:
+      - db
+      - broker
