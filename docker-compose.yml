@@ -3,18 +3,13 @@ version: '3.1'
 services:
   broker:
     image: rabbitmq:latest
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     ports:
       - '5672:5672'
       - '15672:15672'
   redis-server:
-    image: redis:latest
+    image: redis:5.0.3
   database:
     image: percona/percona-server:5.7
-    # ports:
-    #   - '3306:3306'
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -48,6 +43,7 @@ services:
     depends_on:
       - database
       - broker
+      - redis-server
 
   celery:
     build: './flight-booking'
@@ -55,9 +51,11 @@ services:
     depends_on:
       - db
       - broker
+      - redis-server
   celery-beat:
     build: './flight-booking'
     command: celery -A app beat -l info
     depends_on:
       - db
       - broker
+      - redis-server
