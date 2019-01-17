@@ -1,0 +1,21 @@
+FROM python:3.6.6
+
+RUN apt-get update && rm -rf /var/lib/apt
+
+ENV PYTHONUNBUFFERED 1
+
+ENV PROJECT_ROOT /app
+
+COPY requirements.txt /requirements.txt
+
+RUN pip install -r /requirements.txt
+
+RUN mkdir /app
+
+WORKDIR /app
+
+EXPOSE 8000
+
+COPY . /app
+
+CMD ["python", "manage.py", "migrate "]
