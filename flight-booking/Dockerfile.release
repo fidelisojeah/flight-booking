@@ -18,4 +18,4 @@ EXPOSE 8000
 
 COPY . /app
 
-CMD ["python", "manage.py", "migrate "]
+CMD ["python", "manage.py", "migrate"]
