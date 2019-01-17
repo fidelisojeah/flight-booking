@@ -1,4 +1,4 @@
-FROM python:3.7.0
+FROM python:3.6.6
 
 RUN apt-get update && apt-get install -y mysql-client && rm -rf /var/lib/apt
 

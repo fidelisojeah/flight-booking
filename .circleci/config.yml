@@ -4,10 +4,13 @@ jobs:
   test:
     working_directory: ~/repo/flight-booking
     docker:
-      - image: circleci/python:3.7.0
+      - image: circleci/python:3.6.6
         environment:
           DEBUG: on
           SECRET: $SECRET
+          REDIS_URL: $REDIS_URL
+      - image: rabbitmq:latest
+      - image: redis:5.0.3
 
     steps:
       - checkout:
@@ -25,6 +28,13 @@ jobs:
             python3 -m venv venv
             source venv/bin/activate
             pip install -r requirements.txt
+
+      - run:
+          name: Start CELERY
+          command: |
+            source venv/bin/activate
+            celery -A app worker -l info
+          background: true
 
       - save_cache:
           paths:
@@ -62,20 +72,7 @@ jobs:
 
       - run:
           name: Build and deploy docker image
-          command: |
-            echo $HEROKU_API_KEY | docker login --username=$HEROKU_LOGIN --password-stdin registry.heroku.com
-            docker build -t registry.heroku.com/$HEROKU_APP_NAME/web .
-            docker push registry.heroku.com/$HEROKU_APP_NAME/web:latest
-            docker inspect registry.heroku.com/$HEROKU_APP_NAME/web --format={{.Id}} > WEB_DOCKER_IMAGE_ID_FILE
-            export WEB_DOCKER_IMAGE_ID=$(cat WEB_DOCKER_IMAGE_ID_FILE)
-            docker build -t registry.heroku.com/$HEROKU_APP_NAME/release . -f Dockerfile.release
-            docker push registry.heroku.com/$HEROKU_APP_NAME/release:latest
-            docker inspect registry.heroku.com/$HEROKU_APP_NAME/release --format={{.Id}} > RELEASE_DOCKER_IMAGE_ID_FILE
-            export RELEASE_DOCKER_IMAGE_ID=$(cat RELEASE_DOCKER_IMAGE_ID_FILE)
-            curl -n -X PATCH https://api.heroku.com/apps/$HEROKU_APP_NAME/formation \
-            -d "{ \"updates\": [ { \"type\": \"web\", \"docker_image\": \"${WEB_DOCKER_IMAGE_ID}\" }, {\"type\": \"release\", \"docker_image\": \"${RELEASE_DOCKER_IMAGE_ID}\" }]}" -H "Content-Type: application/json" \
-            -H "Accept: application/vnd.heroku+json; version=3.docker-releases" \
-            -H "Authorization: Bearer $HEROKU_API_KEY"
+          command: bash ~/repo/.circleci/build-release.sh
 
 workflows:
   version: 2

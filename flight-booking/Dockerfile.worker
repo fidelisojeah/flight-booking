@@ -18,4 +18,4 @@ EXPOSE 8000
 
 COPY . /app
 
-CMD ["python", "manage.py", "upload-default-image"]
+CMD ["celery", "-A app worker", "-l info"]
