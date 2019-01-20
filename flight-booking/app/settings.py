@@ -239,11 +239,6 @@ if CELERY_BROKER_URL is None:
         hostname=env('RABBIT_HOSTNAME', default='localhost'),
         vhost=env('RABBIT_ENV_VHOST', default=''))
 
-# add heartbeat
-BROKER_HEARTBEAT = '?heartbeat=30'
-if not CELERY_BROKER_URL.endswith(BROKER_HEARTBEAT):
-    CELERY_BROKER_URL += BROKER_HEARTBEAT
-
 CELERY_RESULT_BACKEND = env('REDIS_URL', default='rpc://')
 
 MAX_IMAGE_UPLOAD_SIZE = env('MAX_IMAGE_UPLOAD_SIZE', default=5242880)
