@@ -1,5 +1,7 @@
+import uuid
 from PIL import Image
 from io import BytesIO
+from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
@@ -34,16 +36,16 @@ class AccountsProfilePicture(APITestCase):
             (225, 120, 220)
         )
 
-    def _generate_fake_image(self, file_name, render_size, background_color):
+    def _generate_fake_image(self, file_name, render_size=50, background_color=(200, 200, 200)):
         file = BytesIO()
         image = Image.new(
-            'RGBA',
+            'RGB',
             size=(render_size, render_size),
-            color=background_color)
-        image.save(file, 'png')
+            color=background_color).save(file, 'PNG')
+
         file.name = file_name
         file.seek(0)
-        return file.read()
+        return file
 
     def tearDown(self):
         self.cloudinary_patcher.stop()
@@ -96,7 +98,8 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
             {
                 'profile_picture': invalid_image_data
             },
-            format='multipart')
+            format='multipart',
+        )
 
         self.assertFalse(response.data.get('success'))
 
@@ -110,19 +113,9 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
             'invalid_image'
         )
 
-    @override_settings(MAX_IMAGE_UPLOAD_SIZE=1)
+    @override_settings(MAX_IMAGE_UPLOAD_SIZE=10)
     def test_update_image_image_too_large(self):
         '''Updating Profile Picture - Invalid :- When Image is Too large'''
-        valid_large_image = self._generate_fake_image(
-            'valid_image.png',
-            200,
-            (225, 120, 220)
-        )
-        valid_image_data = SimpleUploadedFile(
-            'valid_image.png',
-            valid_large_image,
-            content_type='image/png'
-        )
         response = self.client.put(
             reverse(
                 'accounts-handle-profile-picture',
@@ -131,7 +124,11 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                     'pk': self.user.account.id
                 }),
             {
-                'profile_picture': valid_image_data
+                'profile_picture': self._generate_fake_image(
+                    'valid_image.png',
+                    200,
+                    (225, 120, 220)
+                )
             },
             format='multipart')
 
@@ -148,43 +145,63 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
         )
 
     def test_update_image_user_invalid(self):
-        '''Updating Profile Picture - Invalid :- When User does not exist'''
+        '''Updating Profile Picture - Invalid :- When User does not exist (invalid uuid)'''
 
-        valid_image_data = SimpleUploadedFile(
+        image_data = SimpleUploadedFile(
             'valid_image.png',
-            self.valid_image,
-            content_type='image/png'
+            self.valid_image.getvalue()
         )
         response = self.client.put(
             reverse(
                 'accounts-handle-profile-picture',
                 kwargs={
                     'version': 'v1',
-                    'pk': 'arandomprofileid1029'
+                    'pk': 'averyRandomPassword'
                 }),
             {
-                'profile_picture': valid_image_data
+                'profile_picture': self._generate_fake_image('valid_image.png')
             },
-            format='multipart'
+            format='multipart',
         )
-
         self.assertFalse(response.data.get('success'))
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
-            response.data.get('errors').get('global')['message'],
+            response.data.get('message'),
+            'An error has occured.'
+        )
+
+    def test_update_image_user_not_exist(self):
+        '''Updating Profile Picture - Invalid :- When User does not exist'''
+        invalid_account = uuid.uuid4()
+
+        response = self.client.put(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': invalid_account
+                }),
+            {
+                'profile_picture': self._generate_fake_image('valid_image.png')
+            },
+            format='multipart',
+        )
+        self.assertFalse(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(
+            response.data.get('errors').get('global'),
             'No Accounts matches the given query.'
+        )
+        self.assertEqual(
+            response.data.get('message'),
+            'An error has occured.'
         )
 
     @patch('cloudinary.uploader.upload', side_effect=user_factory.CloudinaryMock.upload_fail)
     def test_update_image_cloudinary_server_down(self, mock_function):
         '''Updating Profile Picture - Invalid :-When There are issues with the cloudinary server'''
-
-        valid_image_data = SimpleUploadedFile(
-            'valid_image.png',
-            self.valid_image,
-            content_type='image/png'
-        )
         response = self.client.put(
             reverse(
                 'accounts-handle-profile-picture',
@@ -193,9 +210,9 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                     'pk': self.user.account.id
                 }),
             {
-                'profile_picture': valid_image_data
+                'profile_picture': self._generate_fake_image('valid_image.png')
             },
-            format='multipart'
+            format='multipart',
         )
 
         self.assertFalse(response.data.get('success'))
@@ -203,7 +220,7 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
         self.assertEqual(response.status_code,
                          status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertEqual(
-            response.data.get('errors').get('global')['message'],
+            response.data.get('errors').get('global'),
             'An issue has occured with our cloudinary service.'
         )
 
