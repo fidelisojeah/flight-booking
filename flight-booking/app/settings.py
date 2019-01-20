@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'app.accounts',
     'app.helpers',
     'app.uploads',
+    'app.reservations',
 ]
 
 MIDDLEWARE = [

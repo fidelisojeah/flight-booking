@@ -16,7 +16,7 @@ from rest_framework_jwt.settings import api_settings
 
 class UserAuthViewSet(ViewSet):
     '''
-    Handles User Creation, Authentication
+    Handles User Creation, Authentication, Profile Picture Upload and Delete
     '''
     @decorators.action(detail=False, methods=['post'])
     def auth_user(self, request, **kwargs):
