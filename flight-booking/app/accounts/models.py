@@ -8,6 +8,17 @@ from app.uploads.services import default_pic_details
 class Accounts(models.Model):
     ''' Model containing basic User Information '''
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    CLIENT = 0
+    STAFF = 1
+    SUPER_STAFF = 2
+
+    USER_TYPES = (
+        (CLIENT, 'Client'),
+        (STAFF, 'Normal Staff'),
+        (SUPER_STAFF, 'Super Staff'),
+    )
+
     user = models.OneToOneField(
         User,
         null=False,
@@ -17,6 +28,8 @@ class Accounts(models.Model):
     )
     profile_picture_url = models.TextField(default='')
     profile_picture_public_id = models.TextField(default='')
+
+    user_type = models.IntegerField(default=CLIENT, choices=USER_TYPES)
 
     class Meta:
         permissions = (

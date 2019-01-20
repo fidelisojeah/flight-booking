@@ -1,10 +1,12 @@
 import string
 import random
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 
 from app.accounts.models import Accounts
 from cloudinary import api as cloudinary_api
+
+from app.accounts.permissions import GROUPS
 
 
 def create_user(*,
@@ -12,7 +14,8 @@ def create_user(*,
                 password='testuserpassword',
                 username='testuser',
                 first_name='example',
-                last_name='demo'
+                last_name='demo',
+                user_type='client',
                 ):
     ''' Create A user (For testing)'''
     user = User(
@@ -26,12 +29,29 @@ def create_user(*,
 
     user.save()
 
+    user = fix_user_permissions(user, user_type)
+
     account = Accounts.objects.create(
         user=user,
         profile_picture_public_id='profiles/default'
     )
     account.save()
 
+    return user
+
+
+def fix_user_permissions(user, user_type):
+    user_group = GROUPS.get(user_type, None)
+    if user_group is None:
+        return
+
+    for model, permission in user_group:
+        try:
+            user.user_permissions.add(
+                Permission.objects.get(codename=permission)
+            )
+        except Permission.DoesNotExist:
+            pass
     return user
 
 
@@ -64,4 +84,3 @@ class CloudinaryMock:
     def upload_fail(file, **options):
         '''Cloudinary upload mock SERVER ERROR'''
         raise cloudinary_api.Error('Bad Network Connection')
-

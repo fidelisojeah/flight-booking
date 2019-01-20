@@ -23,7 +23,7 @@ from . import serializer as account_serializer
 from app.uploads import (
     tasks as upload_tasks,
     services as upload_services
-    )
+)
 
 
 def create_new_user(*, data):
@@ -76,14 +76,14 @@ def authenticate_user(request, *, data):
 
 def update_profile_picture(requestor, *, account_id, data):
     '''Upload/Edit Profile Picture'''
-    # if requestor.has_perm('accounts.update_any_picture'):
-    #     pass
-    # elif requestor.has_perm('accounts.update_own_picture'):
-    #     if requestor.accounts.id != account_id:
-    #         raise exceptions.PermissionDenied('Insufficient Permission.')
-    #     account_id = requestor.accounts.id
-    # else:
-    #     raise exceptions.PermissionDenied('Insufficient Permission.')
+    if requestor.has_perm('accounts.update_any_picture'):
+        pass
+    elif requestor.has_perm('accounts.update_own_picture'):
+        if str(requestor.account.id) != str(account_id):
+            raise exceptions.PermissionDenied('Insufficient Permission.')
+        # account_id = requestor.account.id
+    else:
+        raise exceptions.PermissionDenied('Insufficient Permission.')
 
     image_serializer = account_serializer.ImageUploadSerializer(
         data=data
@@ -112,14 +112,14 @@ def update_profile_picture(requestor, *, account_id, data):
 
 def delete_profile_picture(requestor, *, account_id):
     '''Remove Profile Picture'''
-    # if requestor.has_perm('accounts.delete_any_picture'):
-    #     pass
-    # elif requestor.has_perm('accounts.delete_own_picture'):
-    #     if requestor.accounts.id != account_id:
-    #         raise exceptions.PermissionDenied('Insufficient Permission.')
-    #     account_id = requestor.accounts.id
-    # else:
-    #     raise exceptions.PermissionDenied('Insufficient Permission.')
+    if requestor.has_perm('accounts.delete_any_picture'):
+        pass
+    elif requestor.has_perm('accounts.delete_own_picture'):
+        if str(requestor.account.id) != str(account_id):
+            raise exceptions.PermissionDenied('Insufficient Permission.')
+        # account_id = requestor.account.id
+    else:
+        raise exceptions.PermissionDenied('Insufficient Permission.')
 
     user_account = generics.get_object_or_404(Accounts, pk=account_id)
 

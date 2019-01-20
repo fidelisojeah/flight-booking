@@ -11,6 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings, utils as django_utils
 
 from app.accounts.tests import factory as user_factory
+from app.helpers import utils
 
 
 class AccountsProfilePicture(APITestCase):
@@ -33,6 +34,14 @@ class AccountsProfilePicture(APITestCase):
             first_name='example',
             last_name='demo'
         )
+        self.super_user = user_factory.create_user(
+            email='adminuser@example.com',
+            password='adminuserpassword',
+            username='adminuser',
+            first_name='Admin',
+            last_name='User',
+            user_type='super_staff'
+        )
         self.valid_image = self._generate_fake_image(
             'valid_image.png',
             50,
@@ -54,6 +63,7 @@ class AccountsProfilePicture(APITestCase):
         self.cloudinary_patcher.stop()
         self.cloudinary_upload_patcher.stop()
         self.user.delete()
+        self.super_user.delete()
 
 
 class AccountsProfilePictureExceptions(AccountsProfilePicture):
@@ -69,7 +79,9 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                     'version': 'v1',
                     'pk': self.user.account.id
                 }),
-            format='multipart')
+            format='multipart',
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+        )
 
         self.assertFalse(response.data.get('success'))
 
@@ -102,6 +114,7 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                 'profile_picture': invalid_image_data
             },
             format='multipart',
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
         )
 
         self.assertFalse(response.data.get('success'))
@@ -133,7 +146,9 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                     (225, 120, 220)
                 )
             },
-            format='multipart')
+            format='multipart',
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+        )
 
         self.assertFalse(response.data.get('success'))
 
@@ -160,6 +175,8 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                 'profile_picture': self._generate_fake_image('valid_image.png')
             },
             format='multipart',
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+
         )
         self.assertFalse(response.data.get('success'))
 
@@ -184,6 +201,7 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                 'profile_picture': self._generate_fake_image('valid_image.png')
             },
             format='multipart',
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
         )
         self.assertFalse(response.data.get('success'))
 
@@ -211,6 +229,7 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                 'profile_picture': self._generate_fake_image('valid_image.png')
             },
             format='multipart',
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
         )
 
         self.assertFalse(response.data.get('success'))
@@ -231,6 +250,7 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                     'version': 'v1',
                     'pk': 'averyRandomPassword'
                 }),
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
         )
         self.assertFalse(response.data.get('success'))
 
@@ -251,6 +271,7 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
                     'version': 'v1',
                     'pk': invalid_account
                 }),
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
         )
         self.assertFalse(response.data.get('success'))
 
@@ -281,6 +302,7 @@ class AccountsProfilePictureValid(AccountsProfilePicture):
                 'profile_picture': self._generate_fake_image('valid_image.png')
             },
             format='multipart',
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
         )
         payload = response.data.get('payload')
         self.assertTrue(response.data.get('success'))
@@ -303,6 +325,7 @@ class AccountsProfilePictureValid(AccountsProfilePicture):
                     'version': 'v1',
                     'pk': self.user.account.id
                 }),
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
         )
         payload = response.data.get('payload')
         self.assertTrue(response.data.get('success'))
@@ -328,6 +351,7 @@ class AccountsProfilePictureValid(AccountsProfilePicture):
                 'profile_picture': self._generate_fake_image('valid_image.png')
             },
             format='multipart',
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
         )
         response = self.client.delete(
             reverse(
@@ -336,6 +360,7 @@ class AccountsProfilePictureValid(AccountsProfilePicture):
                     'version': 'v1',
                     'pk': self.user.account.id
                 }),
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
         )
         payload = response.data.get('payload')
         self.assertTrue(response.data.get('success'))
