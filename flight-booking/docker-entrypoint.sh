@@ -8,8 +8,8 @@ mysqladmin ping -h $MYSQL_DB_HOST
 
 >&2 echo "MySQL Up and running"
 
-if [ "x$DJANGO_MANAGEPY_MIGRATE" = 'xon' ]; then
-    python manage.py migrate --noinput
+if [ "x$DJANGO_MANAGEPY_FIX_PERMISSIONS" = 'xon' ]; then
+    python manage.py fix-permissions
 fi
 
 exec "$@"

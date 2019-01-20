@@ -18,4 +18,6 @@ EXPOSE 8000
 
 COPY . /app
 
+ENV REMAP_SIGTERM SIGQUIT 
+
 CMD ["celery", "-A app worker", "-l info"]
