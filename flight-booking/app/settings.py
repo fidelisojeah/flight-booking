@@ -142,6 +142,7 @@ else:
             'PASSWORD': env('MYSQL_PASSWORD'),
             'OPTIONS': {
                 'autocommit': True,
+                'charset': 'utf8mb4',
             },
         }
     }
@@ -194,11 +195,9 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--verbosity=2',
-    '--cover-erase',
+    '--cover-package=app',
     '--with-xunit',
     '--xunit-file=xunittest.xml',
-    '--with-coverage',
-    '--cover-package=app',
     '--cover-inclusive',
 ]
 
@@ -246,6 +245,8 @@ if not CELERY_BROKER_URL.endswith(BROKER_HEARTBEAT):
     CELERY_BROKER_URL += BROKER_HEARTBEAT
 
 CELERY_RESULT_BACKEND = env('REDIS_URL', default='rpc://')
+
+MAX_IMAGE_UPLOAD_SIZE = env('MAX_IMAGE_UPLOAD_SIZE', default=5242880)
 
 if not IS_TEST:
     django_heroku.settings(locals())

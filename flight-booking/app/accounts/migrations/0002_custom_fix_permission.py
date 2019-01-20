@@ -11,11 +11,9 @@ def fix_permissions(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0001_initial'),
+        ('accounts', '0001_initial')
     ]
-
     operations = [
         migrations.RunPython(fix_permissions)
     ]

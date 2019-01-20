@@ -4,14 +4,17 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from unittest.mock import patch
 
+from app.accounts.tests import factory as user_factory
+
 
 class AuthTest(APITestCase):
     def setUp(self):
         self.cloudinary_patcher = patch('cloudinary.utils.cloudinary_url')
         self.mock_cloudinary = self.cloudinary_patcher.start()
 
-        self.user = User.objects.create_user(
-            email='test@example.com', password='testuserpassword',
+        self.user = user_factory.create_user(
+            email='test@example.com',
+            password='testuserpassword',
             username='testuser',
             first_name='example',
             last_name='demo'

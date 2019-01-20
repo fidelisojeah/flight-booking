@@ -12,7 +12,7 @@ class Accounts(models.Model):
         User,
         null=False,
         blank=False,
-        related_name='%(class)s_account',
+        related_name='account',
         on_delete=models.CASCADE,
     )
     profile_picture_url = models.TextField(default='')

@@ -1,7 +1,0 @@
-[run]
-omit =
-    *migrations*
-    *admin.py*
-    *static*
-    *templates*
-    *app/settings.py*

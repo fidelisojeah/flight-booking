@@ -1,9 +1,11 @@
 import re
 from rest_framework import (
     serializers,
-    validators
+    validators,
 )
 from django.contrib.auth.models import User
+from django.conf import settings
+
 
 from .models import Accounts
 
@@ -22,7 +24,6 @@ class AccountSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     '''UserSerializer - to Validate User Sign Up'''
     account = AccountSerializer(
-        source='accounts_account',
         read_only=True
     )
     email = serializers.EmailField(
@@ -95,3 +96,15 @@ class UserSerializer(serializers.ModelSerializer):
         account.save()
 
         return user
+
+
+class ImageUploadSerializer(serializers.Serializer):
+    '''Validate profile picture upload is of correct format and (size)
+    '''
+    profile_picture = serializers.ImageField(required=True)
+
+    def validate_profile_picture(self, profile_picture):
+        if profile_picture.size > settings.MAX_IMAGE_UPLOAD_SIZE:
+            raise serializers.ValidationError('Image size too large.',
+                                              code='invalid_image')
+        return profile_picture

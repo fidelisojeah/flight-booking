@@ -1,7 +1,12 @@
 from rest_framework import (
     views,
-    exceptions
+    exceptions,
+    status,
+    response as api_response
 )
+from cloudinary import api as cloudinary_api
+from django.conf import settings
+
 from . import utils
 
 
@@ -39,6 +44,16 @@ def handle_exceptions(exc, context):
                     'message': str(value),
                     'type': value.code
                 }
+
+    if isinstance(exc, cloudinary_api.Error):
+        response = api_response.Response(
+            data={'detail': 'cloudinary Error'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+        # print('\n\nCLOUDINARY ERROR:{}\n\n'.format(exc))
+        errors = {
+            'global': 'An issue has occured with our cloudinary service.'
+        }
 
     if response is not None:
         response.data = {}
