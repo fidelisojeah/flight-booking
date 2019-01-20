@@ -65,3 +65,11 @@ class UserAuthViewSet(ViewSet):
                 status=status.HTTP_200_OK,
                 message='Profile Picture Updated Successfully.'
             )
+        if request.method == 'DELETE':
+            return Response(
+                accounts_services.delete_profile_picture(
+                    request.user,
+                    account_id=kwargs.get('pk')),
+                status=status.HTTP_200_OK,
+                message='Profile Picture Removed Successfully.'
+            )

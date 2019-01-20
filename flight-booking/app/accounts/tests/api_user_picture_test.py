@@ -8,14 +8,17 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from unittest.mock import patch
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
+from django.test import override_settings, utils as django_utils
 
 from app.accounts.tests import factory as user_factory
 
 
 class AccountsProfilePicture(APITestCase):
     def setUp(self):
-        self.cloudinary_patcher = patch('cloudinary.utils.cloudinary_url')
+        self.cloudinary_patcher = patch(
+            'cloudinary.utils.cloudinary_url',
+            side_effect=user_factory.CloudinaryMock.cloudinary_url
+        )
         self.cloudinary_upload_patcher = patch(
             'cloudinary.uploader.upload',
             side_effect=user_factory.CloudinaryMock.upload
@@ -146,11 +149,6 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
 
     def test_update_image_user_invalid(self):
         '''Updating Profile Picture - Invalid :- When User does not exist (invalid uuid)'''
-
-        image_data = SimpleUploadedFile(
-            'valid_image.png',
-            self.valid_image.getvalue()
-        )
         response = self.client.put(
             reverse(
                 'accounts-handle-profile-picture',
@@ -224,6 +222,48 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
             'An issue has occured with our cloudinary service.'
         )
 
+    def test_delete_profile_image_user_invalid(self):
+        '''Deleting Profile Picture - Invalid :- When User does not exist (invalid uuid)'''
+        response = self.client.delete(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': 'averyRandomPassword'
+                }),
+        )
+        self.assertFalse(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(
+            response.data.get('message'),
+            'An error has occured.'
+        )
+
+    def test_delete_profile_image_user_not_exist(self):
+        '''Deleting Profile Picture - Invalid :- When User does not exist'''
+        invalid_account = uuid.uuid4()
+
+        response = self.client.delete(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': invalid_account
+                }),
+        )
+        self.assertFalse(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(
+            response.data.get('errors').get('global'),
+            'No Accounts matches the given query.'
+        )
+        self.assertEqual(
+            response.data.get('message'),
+            'An error has occured.'
+        )
+
 
 class AccountsProfilePictureValid(AccountsProfilePicture):
     '''Handle Profile Picture Upload/Retrieve/Delete - When all valid'''
@@ -253,3 +293,55 @@ class AccountsProfilePictureValid(AccountsProfilePicture):
                 self.user.account.id
             )
         )
+
+    def test_delete_profile_image_success_no_previous_upload(self):
+        '''Deleting Profile Picture - Valid: When user had no previous profile picture'''
+        response = self.client.delete(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.user.account.id
+                }),
+        )
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            payload.get('id'), self.user.id
+        )
+        self.assertEqual(
+            payload.get('account').get('picture_url'), 'http://example.com/image_uploads/profiles/default.png')
+
+    @django_utils.override_settings(CELERY_ALWAYS_EAGER=True)
+    @patch('app.uploads.tasks.remove_profile_picture.delay')
+    def test_delete_profile_image_success(self, remove_profile_picture):
+        '''Deleting Profile Picture - Valid: When user had previous profile picture'''
+        result = self.client.put(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.user.account.id
+                }),
+            {
+                'profile_picture': self._generate_fake_image('valid_image.png')
+            },
+            format='multipart',
+        )
+        response = self.client.delete(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.user.account.id
+                }),
+        )
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            payload.get('id'), self.user.id
+        )
+        self.assertEqual(
+            payload.get('account').get('picture_url'), 'http://example.com/image_uploads/profiles/default.png')

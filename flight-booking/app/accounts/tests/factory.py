@@ -36,6 +36,16 @@ def create_user(*,
 
 
 class CloudinaryMock:
+    def cloudinary_url(public_id, **options):
+        '''Mock Cloudinary url util'''
+        if options.pop('secure', None) is not None:
+            options['secure'] = 'https://example.com/image_uploads/{}'.format(
+                public_id)
+
+        normal_url = 'http://example.com/image_uploads/{}'.format(
+            public_id)
+        return normal_url, options
+
     def upload(file, **options):
         '''Cloudinary upload mock'''
         public_id = options.get('public_id', 'default').replace(" ", "-")
@@ -54,3 +64,4 @@ class CloudinaryMock:
     def upload_fail(file, **options):
         '''Cloudinary upload mock SERVER ERROR'''
         raise cloudinary_api.Error('Bad Network Connection')
+

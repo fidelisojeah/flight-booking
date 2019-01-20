@@ -20,7 +20,10 @@ from app.helpers import (
 
 from .models import Accounts
 from . import serializer as account_serializer
-from app.uploads import services as upload_services
+from app.uploads import (
+    tasks as upload_tasks,
+    services as upload_services
+    )
 
 
 def create_new_user(*, data):
@@ -101,6 +104,32 @@ def update_profile_picture(requestor, *, account_id, data):
 
     user_account.profile_picture_public_id = profile_picture_public_id
     user_account.profile_picture_url = image_upload.get('secure_url')
+
+    user_account.save()
+
+    return account_serializer.UserSerializer(user_account.user).data
+
+
+def delete_profile_picture(requestor, *, account_id):
+    '''Remove Profile Picture'''
+    # if requestor.has_perm('accounts.delete_any_picture'):
+    #     pass
+    # elif requestor.has_perm('accounts.delete_own_picture'):
+    #     if requestor.accounts.id != account_id:
+    #         raise exceptions.PermissionDenied('Insufficient Permission.')
+    #     account_id = requestor.accounts.id
+    # else:
+    #     raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    user_account = generics.get_object_or_404(Accounts, pk=account_id)
+
+    profile_picture_public_id = user_account.profile_picture_public_id
+
+    if profile_picture_public_id != 'profiles/default':
+        upload_tasks.remove_profile_picture.delay(profile_picture_public_id)
+
+    user_account.profile_picture_url = ''
+    user_account.profile_picture_public_id = 'profiles/default'
 
     user_account.save()
 
