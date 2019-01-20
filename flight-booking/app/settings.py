@@ -226,7 +226,7 @@ JWT_AUTH = {
 CELERY_TIMEZONE = env('CELERY_TIMEZONE', default='UTC')
 CELERY_TASK_SERIALIZER = env('CELERY_TASK_SERIALIZER', default='json')
 CELERY_RESULT_SERIALIZER = env('CELERY_RESULT_SERIALIZER', default='json')
-CELERY_ACCEPT_CONTENT = ['json', 'application/text']
+CELERY_ACCEPT_CONTENT = ['json', 'application/text', 'pickle', 'msgpack', 'yaml']
 CELERY_ACKS_LATE = True
 CELERY_TASK_PUBLISH_RETRY = True
 CELERY_DISABLE_RATE_LIMITS = False
