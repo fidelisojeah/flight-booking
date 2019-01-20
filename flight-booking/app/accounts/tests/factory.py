@@ -31,9 +31,16 @@ def create_user(*,
 
     user = fix_user_permissions(user, user_type)
 
+    account_user_type = Accounts.CLIENT
+    if user_type == 'staff':
+        account_user_type = Accounts.STAFF
+    if user_type == 'super_staff':
+        account_user_type = Accounts.SUPER_STAFF
+
     account = Accounts.objects.create(
         user=user,
-        profile_picture_public_id='profiles/default'
+        profile_picture_public_id='profiles/default',
+        user_type=account_user_type
     )
     account.save()
 

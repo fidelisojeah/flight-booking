@@ -215,6 +215,61 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
             'An error has occured.'
         )
 
+    def test_update_image_user_bad_permissions(self):
+        '''Updating Profile Picture - Invalid :- When User does not have sufficient permission (update any)'''
+
+        response = self.client.put(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.super_user.account.id
+                }),
+            {
+                'profile_picture': self._generate_fake_image('valid_image.png')
+            },
+            format='multipart',
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+        )
+        self.assertFalse(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.data.get('errors').get('global'),
+            'Insufficient Permission.'
+        )
+        self.assertEqual(
+            response.data.get('message'),
+            'An error has occured.'
+        )
+
+    def test_update_image_user_no_permissions(self):
+        '''Updating Profile Picture - Invalid :- No permission (not logged in maybe)'''
+
+        response = self.client.put(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.super_user.account.id
+                }),
+            {
+                'profile_picture': self._generate_fake_image('valid_image.png')
+            },
+            format='multipart',
+        )
+        self.assertFalse(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.data.get('errors').get('global'),
+            'Insufficient Permission.'
+        )
+        self.assertEqual(
+            response.data.get('message'),
+            'An error has occured.'
+        )
+
     @patch('cloudinary.uploader.upload', side_effect=user_factory.CloudinaryMock.upload_fail)
     def test_update_image_cloudinary_server_down(self, mock_function):
         '''Updating Profile Picture - Invalid :-When There are issues with the cloudinary server'''
@@ -279,6 +334,53 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
         self.assertEqual(
             response.data.get('errors').get('global'),
             'No Accounts matches the given query.'
+        )
+        self.assertEqual(
+            response.data.get('message'),
+            'An error has occured.'
+        )
+
+    def test_delete_profile_image_bad_permissions(self):
+        '''Deleting Profile Picture - Invalid :- When User does not have sufficient permission (update any)'''
+
+        response = self.client.delete(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.super_user.account.id
+                }),
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+        )
+        self.assertFalse(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.data.get('errors').get('global'),
+            'Insufficient Permission.'
+        )
+        self.assertEqual(
+            response.data.get('message'),
+            'An error has occured.'
+        )
+
+    def test_delete_profile_image_no_permissions(self):
+        '''Deleting Profile Picture - Invalid :- When No permission (not logged in)'''
+
+        response = self.client.delete(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.super_user.account.id
+                }),
+        )
+        self.assertFalse(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.data.get('errors').get('global'),
+            'Insufficient Permission.'
         )
         self.assertEqual(
             response.data.get('message'),
