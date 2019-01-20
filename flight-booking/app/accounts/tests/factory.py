@@ -43,12 +43,12 @@ class CloudinaryMock:
         if public_id.endswith('/'):
             public_id += ''.join(random.choices(string.ascii_lowercase, k=6))
 
-        secure_url = 'https://example.com/image_uploads/{}.jpg'.format(
+        secure_url = 'https://example.com/image_uploads/{}.png'.format(
             public_id)
 
         return {
             'secure_url': secure_url,
-            'url': 'http://example.com/image_uploads/{}.jpg'.format(public_id)
+            'url': 'http://example.com/image_uploads/{}.png'.format(public_id)
         }
 
     def upload_fail(file, **options):

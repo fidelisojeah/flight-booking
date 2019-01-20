@@ -227,3 +227,29 @@ class AccountsProfilePictureExceptions(AccountsProfilePicture):
 
 class AccountsProfilePictureValid(AccountsProfilePicture):
     '''Handle Profile Picture Upload/Retrieve/Delete - When all valid'''
+
+    def test_update_image_success(self):
+        '''Updating Profile Picture - Valid: When the image is valid and uploaded'''
+        response = self.client.put(
+            reverse(
+                'accounts-handle-profile-picture',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.user.account.id
+                }),
+            {
+                'profile_picture': self._generate_fake_image('valid_image.png')
+            },
+            format='multipart',
+        )
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            payload.get('id'), self.user.id
+        )
+        self.assertEqual(
+            payload.get('account').get('picture_url'), 'https://example.com/image_uploads/profiles/{}.png'.format(
+                self.user.account.id
+            )
+        )
