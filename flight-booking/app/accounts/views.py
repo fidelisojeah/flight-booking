@@ -52,3 +52,24 @@ class UserAuthViewSet(ViewSet):
             status=status.HTTP_201_CREATED,
             message='User Account Created Successfully.'
         )
+
+    @decorators.action(detail=True, methods=['put', 'delete'], url_path='picture')
+    def handle_profile_picture(self, request, **kwargs):
+        '''To Update/Delete Profile Picture'''
+        if request.method == 'PUT':
+            return Response(
+                accounts_services.update_profile_picture(
+                    request.user,
+                    account_id=kwargs.get('pk'),
+                    data=request.FILES),
+                status=status.HTTP_200_OK,
+                message='Profile Picture Updated Successfully.'
+            )
+        if request.method == 'DELETE':
+            return Response(
+                accounts_services.delete_profile_picture(
+                    request.user,
+                    account_id=kwargs.get('pk')),
+                status=status.HTTP_200_OK,
+                message='Profile Picture Removed Successfully.'
+            )

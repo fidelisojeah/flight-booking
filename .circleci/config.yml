@@ -69,6 +69,7 @@ jobs:
     steps:
       - checkout:
           path: ~/repo
+
       - run:
           name: Build and deploy docker image
           command: bash ~/repo/.circleci/build-release.sh

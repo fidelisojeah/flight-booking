@@ -1,13 +1,31 @@
 import re
 from rest_framework import (
     serializers,
-    validators
+    validators,
 )
 from django.contrib.auth.models import User
+from django.conf import settings
+
+
+from .models import Accounts
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    picture_url = serializers.CharField(source='get_profile_picture_url')
+
+    class Meta:
+        model = Accounts
+        fields = (
+            'id',
+            'picture_url'
+        )
 
 
 class UserSerializer(serializers.ModelSerializer):
     '''UserSerializer - to Validate User Sign Up'''
+    account = AccountSerializer(
+        read_only=True
+    )
     email = serializers.EmailField(
         required=True,
         validators=[validators.UniqueValidator(queryset=User.objects.all())]
@@ -32,6 +50,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id',
+            'account',
             'email',
             'password',
             'username',
@@ -67,5 +86,25 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
         user.set_password(validated_data['password'])
+
         user.save()
+
+        account = Accounts.objects.create(
+            user=user,
+            profile_picture_public_id='profiles/default'
+        )
+        account.save()
+
         return user
+
+
+class ImageUploadSerializer(serializers.Serializer):
+    '''Validate profile picture upload is of correct format and (size)
+    '''
+    profile_picture = serializers.ImageField(required=True)
+
+    def validate_profile_picture(self, profile_picture):
+        if profile_picture.size > settings.MAX_IMAGE_UPLOAD_SIZE:
+            raise serializers.ValidationError('Image size too large.',
+                                              code='invalid_image')
+        return profile_picture

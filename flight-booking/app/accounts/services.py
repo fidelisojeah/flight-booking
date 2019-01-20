@@ -11,12 +11,19 @@ from django.db.models import Q
 
 from rest_framework_jwt.settings import api_settings
 from rest_framework import (
-    exceptions
+    exceptions,
+    generics
 )
 from app.helpers import (
     utils
 )
+
+from .models import Accounts
 from . import serializer as account_serializer
+from app.uploads import (
+    tasks as upload_tasks,
+    services as upload_services
+)
 
 
 def create_new_user(*, data):
@@ -65,3 +72,65 @@ def authenticate_user(request, *, data):
     raise exceptions.NotAuthenticated(
         'Unable to log in with provided credentials.'
     )
+
+
+def update_profile_picture(requestor, *, account_id, data):
+    '''Upload/Edit Profile Picture'''
+    if requestor.has_perm('accounts.update_any_picture'):
+        pass
+    elif requestor.has_perm('accounts.update_own_picture'):
+        if str(requestor.account.id) != str(account_id):
+            raise exceptions.PermissionDenied('Insufficient Permission.')
+        # account_id = requestor.account.id
+    else:
+        raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    image_serializer = account_serializer.ImageUploadSerializer(
+        data=data
+    )
+
+    image_serializer.is_valid(raise_exception=True)
+
+    user_account = generics.get_object_or_404(Accounts, pk=account_id)
+
+    profile_picture_public_id = 'profiles/{}'.format(
+        user_account.id)
+    # UPLOAD profile Picture
+
+    image_upload = upload_services.upload_picture(
+        image_serializer.validated_data.get('profile_picture'),
+        picture_public_id=profile_picture_public_id
+    )
+
+    user_account.profile_picture_public_id = profile_picture_public_id
+    user_account.profile_picture_url = image_upload.get('secure_url')
+
+    user_account.save()
+
+    return account_serializer.UserSerializer(user_account.user).data
+
+
+def delete_profile_picture(requestor, *, account_id):
+    '''Remove Profile Picture'''
+    if requestor.has_perm('accounts.delete_any_picture'):
+        pass
+    elif requestor.has_perm('accounts.delete_own_picture'):
+        if str(requestor.account.id) != str(account_id):
+            raise exceptions.PermissionDenied('Insufficient Permission.')
+        # account_id = requestor.account.id
+    else:
+        raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    user_account = generics.get_object_or_404(Accounts, pk=account_id)
+
+    profile_picture_public_id = user_account.profile_picture_public_id
+
+    if profile_picture_public_id != 'profiles/default':
+        upload_tasks.remove_profile_picture.delay(profile_picture_public_id)
+
+    user_account.profile_picture_url = ''
+    user_account.profile_picture_public_id = 'profiles/default'
+
+    user_account.save()
+
+    return account_serializer.UserSerializer(user_account.user).data

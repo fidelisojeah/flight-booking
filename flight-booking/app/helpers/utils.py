@@ -3,9 +3,11 @@ from rest_framework import (
     exceptions,
     serializers
 )
+from rest_framework_jwt.settings import api_settings
 from app.accounts.serializer import(
     UserSerializer
 )
+from django.conf import settings
 
 
 class FieldErrorExceptions(exceptions.APIException):
@@ -55,3 +57,12 @@ def jwt_response_payload_handler(token, user=None, request=None):
         'token': token,
         'user': UserSerializer(user, context={'request': request}).data
     }
+
+
+def generate_token(user):
+    token = api_settings.JWT_ENCODE_HANDLER(
+        api_settings.JWT_PAYLOAD_HANDLER(user)
+    )
+
+    return '{} {}'.format(settings.JWT_AUTH['JWT_AUTH_HEADER_PREFIX'], token)
+
