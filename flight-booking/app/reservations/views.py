@@ -13,6 +13,23 @@ class ReservationViewSet(ViewSet):
     # TODO: Allow user book reservation
     # tests
     # permissions
+    def list(self, request, **kwargs):
+        return Response(
+            reservation_services.filter_reservations(
+                request.user,
+                request.query_params
+            )
+        )
+
+    def retrieve(self, request, **kwargs):
+        return Response(
+            reservation_services.retrieve_reservation(
+                request.user,
+                reservation_pk=kwargs.get('pk'),
+                query_params=request.query_params
+            )
+        )
+
     def create(self, request, **kwargs):
         return Response(
             reservation_services.make_own_reservation(

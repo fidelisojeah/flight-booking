@@ -236,3 +236,11 @@ def make_own_reservation(requestor, *, data):
     serializer.save()
 
     return serializer.data
+
+
+def filter_reservations(requestor, query_params):
+    pass
+
+
+def retrieve_reservation(requestor, *, reservation_pk, query_params):
+    pass
