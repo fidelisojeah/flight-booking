@@ -134,19 +134,20 @@ if IS_TEST:
     }
     DEBUG = False
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'mysql.connector.django',
-            'HOST': env('MYSQL_DB_HOST'),
-            'USER': env('MYSQL_USER'),
-            'NAME': env('MYSQL_DATABASE'),
-            'PASSWORD': env('MYSQL_PASSWORD'),
-            'OPTIONS': {
-                'autocommit': True,
-                'charset': 'utf8mb4',
-            },
+    if env('MYSQL_DB_HOST', default=None) is not None:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.mysql',
+                'HOST': env('MYSQL_DB_HOST'),
+                'USER': env('MYSQL_USER'),
+                'NAME': env('MYSQL_DATABASE'),
+                'PASSWORD': env('MYSQL_PASSWORD'),
+                'OPTIONS': {
+                    'autocommit': True,
+                    'charset': 'utf8mb4',
+                },
+            }
         }
-    }
 
 
 # Password validation

@@ -10,5 +10,7 @@ urlpatterns = [
 router = DefaultRouter()
 router.register(r'reservations', views.ReservationViewSet,
                 basename='reservations')
+router.register(r'reservations/flights', views.FlightsViewSet,
+                basename='flights')
 
 urlpatterns += router.urls
