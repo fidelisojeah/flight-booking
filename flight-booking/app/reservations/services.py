@@ -1,21 +1,24 @@
-from datetime import timedelta
+from datetime import timedelta, datetime, date
 from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from django.db import transaction, models
 
 from rest_framework import (
     generics,
-    exceptions
+    exceptions,
+    pagination
 )
 from .serializers import (
     FlightSchedulerSerializer,
     FlightSerializer,
-    ReservationSerializer
+    ReservationSerializer,
+    AirlineSerializer
 )
 
 from app.accounts.models import Accounts
 
-from .models import(Flight, Airline)
+from .models import(Flight, Airline, Reservation)
 
 
 def _validate_schedule_details_(data, airline_code):
@@ -24,8 +27,6 @@ def _validate_schedule_details_(data, airline_code):
 
     if isinstance(data.get('flight_type'), int):
         schedule_details['flight_type'] = [data.get('flight_type')]
-
-    schedule_details['airline'] = airline_code
 
     schedule_serializer = FlightSchedulerSerializer(data=schedule_details)
 
@@ -41,9 +42,9 @@ def bulk_schedule_flight(requestor, *, period_type='days', airline_code, data):
 
     assert period_type == 'days' or period_type == 'weeks'
 
-    validated_data = _validate_schedule_details_(data, airline_code)
+    airline = generics.get_object_or_404(Airline, pk=airline_code)
 
-    airline = validated_data.pop('airline')
+    validated_data = _validate_schedule_details_(data, airline_code)
 
     time_of_flight = validated_data.pop('time_of_flight')
     period = validated_data.pop('period')
@@ -88,7 +89,9 @@ def schedule_flight(requestor, *, airline_code, data):
 
     flight_details = data.copy()
 
-    flight_details['airline'] = airline_code
+    airline = generics.get_object_or_404(Airline, pk=airline_code)
+
+    flight_details['airline'] = airline
 
     serializer = FlightSerializer(data=flight_details)
 
@@ -115,14 +118,14 @@ def filter_flights(requestor, *, query_params):
     )
 
     if filter_date is not None:
-        if isinstance(filter_date, datetime.datetime):
+        if isinstance(filter_date, datetime):
             filter_date = filter_date.date()
         elif isinstance(filter_date, str):
             try:
                 filter_date = parse(filter_date)
             except ValueError:
                 pass
-        if isinstance(filter_date, datetime.date):
+        if isinstance(filter_date, date):
             flights = flights.filter(
                 expected_departure__contains=filter_date
             )
@@ -196,7 +199,7 @@ def retrieve_flight(requestor, flight_pk):
 
 def make_reservation(requestor, *, account_pk, data):
     '''Make Flight Reservations'''
-    # print(requestor.get_all_permissions())
+    # TODO: Ensure reservation is not in the past
     if requestor.has_perm('reservations.create_any_reservation'):
         pass
     elif requestor.has_perm('reservations.add_reservation'):
@@ -209,16 +212,100 @@ def make_reservation(requestor, *, account_pk, data):
 
     reservation_data = data.copy()
 
-    reservation_data['author'] = user_account
+    reservation_data['author'] = user_account.id
 
     serializer = ReservationSerializer(
         data=reservation_data
     )
     serializer.is_valid(raise_exception=True)
 
+    serializer.save()
+
+    return serializer.data
+
+
+def make_flight_reservation(requestor, *, flight_pk, data):
+    '''Make Flight Reservations For self'''
+    if not requestor.has_perm('reservations.add_reservation'):
+        raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    account_pk = requestor.account.id
+
+    reservation_data = data.copy()
+
+    reservation_data['author'] = account_pk
+
+    flight = generics.get_object_or_404(Flight, pk=flight_pk)
+
+    reservation_data['first_flight'] = flight.id
+
+    serializer = ReservationSerializer(
+        data=reservation_data
+    )
+    serializer.is_valid(raise_exception=True)
+
+    serializer.save()
+
+    return serializer.data
+
+
+def filter_reservations(requestor, query_params, *, account_pk=None):
+    '''List and filter reservations'''
+    reservations = Reservation.objects.filter(deleted_at=None)
+    if requestor.has_perm('reservations.retrieve_any_reservations'):
+        if account_pk is not None:
+            reservations.filter(author=account_pk)
+    elif requestor.has_perm('reservations.retrieve_own_reservations'):
+        if account_pk is not None and account_pk != str(requestor.account.id):
+            raise exceptions.PermissionDenied('Insufficient Permission.')
+
+        reservations = reservations.filter(author=requestor.account.id)
+    else:
+        raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    filter_date = query_params.get('date', None)
+    filter_flight_number = query_params.get('flight_number', None)
+
+    if filter_flight_number is not None:
+        reservations = reservations.filter(models.Q(
+            first_flight__flight_number=filter_flight_number
+        ) | models.Q(
+            return_flight__flight_number=filter_flight_number
+        ))
+
+    if filter_date is not None:
+        if isinstance(filter_date, datetime):
+            filter_date = filter_date.date()
+        elif isinstance(filter_date, str):
+            try:
+                filter_date = parse(filter_date)
+            except ValueError:
+                pass
+    if isinstance(filter_date, date):
+        reservations = reservations.filter(models.Q(
+            first_flight__expected_departure__contains=filter_date
+        ) | models.Q(
+            return_flight__expected_departure__contains=filter_date
+        ))
+
+    return ReservationSerializer(reservations, many=True).data
+
+
+def filter_flight_reservations(requestor, flight_pk):
+    if not requestor.has_perm('reservations.retrieve_any_reservations'):
+        raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    flight = generics.get_object_or_404(Flight, pk=flight_pk)
+
+    combined_reservations = flight.reservation_departure.order_by('first_flight').union(
+        flight.reservation_return.order_by('return_flight'))
+
+    return ReservationSerializer(combined_reservations, many=True).data
+
 
 def make_own_reservation(requestor, *, data):
     '''Make Flight Reservations For self'''
+    # TODO: Ensure reservation is not in the past
     if not requestor.has_perm('reservations.add_reservation'):
         raise exceptions.PermissionDenied('Insufficient Permission.')
 
@@ -238,9 +325,55 @@ def make_own_reservation(requestor, *, data):
     return serializer.data
 
 
-def filter_reservations(requestor, query_params):
-    pass
+def filter_reservations_by_period(requestor, *, month, year, query_params, period):
+    '''List and filter reservations by period'''
+    reservations = Reservation.objects.filter(deleted_at=None)
+    if requestor.has_perm('reservations.retrieve_any_reservations'):
+        pass
+    elif requestor.has_perm('reservations.retrieve_own_reservations'):
+        reservations = Reservation.objects.filter(author=requestor.account.id)
+    else:
+        raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    start_range = parse('2019').replace(month=1, day=1)
+    end_range = start_range + relativedelta(months=12) - timedelta(days=1)
+
+    if period == 'month':
+        if int(month) < 1 or int(month) > 12:
+            raise exceptions.ParseError('Not a valid month.')
+
+        start_range = start_range.replace(month=int(month), day=1)
+        end_range = start_range + relativedelta(months=1) - timedelta(days=1)
+
+    reservations = reservations.filter(models.Q(
+        first_flight__expected_departure__range=[start_range, end_range]
+    ) | models.Q(
+        return_flight__expected_departure__range=[start_range, end_range]
+    ))
+
+    return ReservationSerializer(reservations, many=True).data
 
 
 def retrieve_reservation(requestor, *, reservation_pk, query_params):
-    pass
+    '''Retrieve single Reservation'''
+    reservation = generics.get_object_or_404(Reservation, pk=reservation_pk)
+
+    if requestor.has_perm('reservations.retrieve_any_reservations'):
+        pass
+    elif requestor.has_perm('reservations.retrieve_own_reservations'):
+        if requestor.account.id != str(reservation.author.id):
+            raise exceptions.NotFound()
+    else:
+        raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    return ReservationSerializer(reservation).data
+
+
+def filter_airlines(requestor, query_params):
+    '''Filter Airline Information'''
+    if not requestor.has_perm('reservations.view_airline'):
+        raise exceptions.PermissionDenied('Insufficient Permission.')
+
+    airlines = Airline.objects.all()
+
+    return airlines

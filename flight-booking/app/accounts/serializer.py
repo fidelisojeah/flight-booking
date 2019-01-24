@@ -3,7 +3,7 @@ from rest_framework import (
     serializers,
     validators,
 )
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.conf import settings
 
 
@@ -88,6 +88,13 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
 
         user.save()
+        try:
+            user.groups.add(
+                Group.objects.get(name='client')
+            )
+        except Group.DoesNotExist:
+            print('Please fix-permissions --log')
+            pass
 
         account = Accounts.objects.create(
             user=user,
@@ -108,3 +115,18 @@ class ImageUploadSerializer(serializers.Serializer):
             raise serializers.ValidationError('Image size too large.',
                                               code='invalid_image')
         return profile_picture
+
+
+class CompactAccountsViewSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(
+        read_only=True,
+        source='get_full_name'
+    )
+    user_name = serializers.CharField(
+        read_only=True,
+        source='user.username'
+    )
+
+    class Meta:
+        model = Accounts
+        fields = ('full_name', 'user_name')

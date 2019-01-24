@@ -52,7 +52,7 @@ class TestCommands(TestCase):
         call_command('fix-permissions')
 
         all_groups = Group.objects.all()
-        self.assertEqual(all_groups.count(), 2)
+        self.assertEqual(all_groups.count(), 3)
 
     def test_upload_default_image_management_command(self):
         '''Upload Default Image Command: test cloudinary called'''

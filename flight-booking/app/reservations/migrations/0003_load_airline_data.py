@@ -4,15 +4,6 @@ from django.conf import settings
 from django.db import transaction, migrations, IntegrityError
 
 
-def _make_airport_dict(airline):
-
-    fields = {
-        'airline_name': airline.get('iata', None),
-        'code': airline.get('code', None)
-    }
-    return fields
-
-
 def load_airline_data(apps, schema_editor):
     Airline = apps.get_model('reservations', 'Airline')
     db_alias = schema_editor.connection.alias

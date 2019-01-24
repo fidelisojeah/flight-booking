@@ -18,9 +18,9 @@ class Response(drf_response.Response):
 
         data = {
             'status_code': status,
-            'payload': old_data,
+            'success': True,
             'message': 'Returned Successfully.',
-            'success': True
+            'payload': old_data,
         }
 
         if status == drf_status.HTTP_201_CREATED:

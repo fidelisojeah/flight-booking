@@ -46,3 +46,6 @@ class Accounts(models.Model):
         if not self.profile_picture_url or self.profile_picture_public_id == 'profiles/default':
             return default_pic_details()
         return self.profile_picture_url
+
+    def get_full_name(self):
+        return '{} {}'.format(self.user.first_name, self.user.last_name)

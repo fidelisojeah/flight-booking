@@ -6,6 +6,7 @@ GROUPS = {
         ('accounts', 'update_own_picture'),
 
         ('airline', 'view_flights'),
+        ('airline', 'view_airline'),
 
         ('flight', 'view_flight'),
 

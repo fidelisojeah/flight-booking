@@ -167,29 +167,42 @@ class Reservation(models.Model):
 
         if self.ticket_type == self.RETURN:
             if not (hasattr(self, 'return_flight') and self.return_flight):
-                raise exceptions.ParseError(
-                    'Return Tickets Must have Return Flights',
-                )
+                raise utils.FieldErrorExceptions({
+                    'return_flight': {
+                        'message': 'This field is required.',
+                        'type': 'required'
+                    }})
             if self.return_flight == self.first_flight:
                 raise utils.FieldErrorExceptions({
                     'return_flight': {
                         'message': 'Return Flight cannot be same as first flight.',
-                        'code': 'invalid'
+                        'type': 'invalid'
                     },
                     'first_flight': {
                         'message': 'Return Flight cannot be same as first flight.',
-                        'code': 'invalid'
+                        'type': 'invalid'
                     }
                 })
-            if self.return_flight.expected_arrival < self.first_flight.expected_departure:
+            if self.first_flight.expected_arrival > self.return_flight.expected_departure:
                 raise utils.FieldErrorExceptions({
                     'return_flight': {
                         'message': 'Return Flight cannot take off before First Flight lands.',
-                        'code': 'invalid'
+                        'type': 'invalid'
                     },
                     'first_flight': {
                         'message': 'Return Flight cannot take off before First Flight lands.',
-                        'code': 'invalid'
+                        'type': 'invalid'
+                    }
+                })
+            if self.return_flight.arrival_airport != self.first_flight.departure_airport:
+                raise utils.FieldErrorExceptions({
+                    'return_flight': {
+                        'message': 'Return Flight must land in same city as first flight.',
+                        'type': 'invalid'
+                    },
+                    'first_flight': {
+                        'message': 'Return Flight must land in same city as first flight.',
+                        'type': 'invalid'
                     }
                 })
         else:
