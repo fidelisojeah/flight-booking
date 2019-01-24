@@ -125,6 +125,8 @@ WSGI_APPLICATION = 'app.wsgi.application'
 IS_TEST = (len(sys.argv) > 1 and sys.argv[1] == 'test') or env(
     'CIRCLECI', default=False)
 if IS_TEST:
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    EMAIL_FILE_PATH = './results/app-messages'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -218,7 +220,8 @@ JWT_AUTH = {
 CELERY_TIMEZONE = env('CELERY_TIMEZONE', default='UTC')
 CELERY_TASK_SERIALIZER = env('CELERY_TASK_SERIALIZER', default='json')
 CELERY_RESULT_SERIALIZER = env('CELERY_RESULT_SERIALIZER', default='json')
-CELERY_ACCEPT_CONTENT = ['json', 'application/text', 'pickle', 'msgpack', 'yaml']
+CELERY_ACCEPT_CONTENT = [
+    'json', 'application/text', 'pickle', 'msgpack', 'yaml']
 CELERY_ACKS_LATE = True
 CELERY_TASK_PUBLISH_RETRY = True
 CELERY_DISABLE_RATE_LIMITS = False
@@ -235,6 +238,15 @@ if CELERY_BROKER_URL is None:
 CELERY_RESULT_BACKEND = env('REDIS_URL', default='rpc://')
 
 MAX_IMAGE_UPLOAD_SIZE = env('MAX_IMAGE_UPLOAD_SIZE', default=5242880)
+
+EMAIL_HOST = env('EMAIL_SERVER', default='localhost')
+EMAIL_PORT = env('EMAIL_PORT', default=587)
+EMAIL_HOST_USER = env('EMAIL_USERNAME', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD', default='')
+EMAIL_USE_TLS = True
+EMAIL_DOMAIN_URL = env('EMAIL_DOMAIN_URL', default='localhost')
+
+APP_URL = env('APP_URL', default='https://localhost')
 
 if (not IS_TEST) and (not DEBUG):
     django_heroku.settings(locals())
