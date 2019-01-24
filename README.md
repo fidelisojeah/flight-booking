@@ -1,8 +1,9 @@
 # flight-booking
 
 [![CircleCI](https://circleci.com/gh/fidelisojeah/flight-booking.svg?style=svg)](https://circleci.com/gh/fidelisojeah/flight-booking)
-Flight Booking Application
 
+Flight Booking Application
+API at: [https://flight-booking-lms.herokuapp.com](<https://flight-booking-lms.herokuapp.com>)
 ## Installation and configuration
 
 ### In a Development Environment

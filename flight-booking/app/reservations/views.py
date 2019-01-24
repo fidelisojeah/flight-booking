@@ -69,6 +69,10 @@ class ReservationViewSet(ViewSet):
 
     @decorators.action(detail=True, methods=['get'], url_path='email')
     def send_reservation_email(self, request, **kwargs):
+        '''
+        get:
+        Retrieve Reservation Information and Sent them to email
+        '''
         return Response(
             reservation_services.send_reservation_email(
                 request.user,
