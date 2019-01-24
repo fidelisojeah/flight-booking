@@ -29,7 +29,7 @@ class Command(BaseCommand):
         if reservation.first_flight.expected_departure < today:
             flight = today_reservations.return_flight
 
-        reservation_url = 'reservations/{}/'.format(reservation.id)
+        reservation_url = '/reservations/{}/'.format(reservation.id)
         site = settings.APP_URL
 
         html = render_to_string('flight_reservation.html', {
