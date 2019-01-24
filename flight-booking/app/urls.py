@@ -15,10 +15,8 @@ Including another URLconf
 """
 
 from django.urls import path, include, re_path
-from rest_framework.documentation import include_docs_urls
 
 urlpatterns = [
     re_path('api/(?P<version>(v[0-9]))/', include('app.accounts.urls')),
     re_path('api/(?P<version>(v[0-9]))/', include('app.reservations.urls')),
-    re_path('docs/', include_docs_urls(title='Flight Booking API Docs'))
 ]
