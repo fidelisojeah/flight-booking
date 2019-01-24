@@ -3,9 +3,6 @@ version: '3.1'
 services:
   broker:
     image: rabbitmq:latest
-    ports:
-      - '5672:5672'
-      - '15672:15672'
   redis-server:
     image: redis:5.0.3
   database:
@@ -21,7 +18,8 @@ services:
 
   django-app:
     build: './flight-booking'
-    command: gunicorn app.wsgi --bind 0.0.0.0:8000
+    # command: gunicorn app.wsgi --bind 0.0.0.0:8000
+    command: python manage.py migrate
     restart: always
     ports:
       - '8000:8000'
@@ -46,16 +44,20 @@ services:
       - redis-server
 
   celery:
-    build: './flight-booking'
+    build:
+      context: './flight-booking'
+      dockerfile: Dockerfile.worker
     command: celery -A app worker -l info
     depends_on:
-      - db
+      - database
       - broker
       - redis-server
   celery-beat:
-    build: './flight-booking'
+    build:
+      context: './flight-booking'
+      dockerfile: Dockerfile.beat
     command: celery -A app beat -l info
     depends_on:
-      - db
+      - database
       - broker
       - redis-server
