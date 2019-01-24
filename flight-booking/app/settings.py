@@ -134,7 +134,18 @@ if IS_TEST:
     }
     DEBUG = False
 else:
-    if env('MYSQL_DB_HOST', default=None) is not None:
+    if env('POSTGRES_DB_HOST, default=None) is not None:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'HOST': env('POSTGRES_DB_HOST'),
+                'USER': env('POSTGRES_DB_USER'),
+                'NAME': env('POSTGRES_DB_NAME'),
+                'PASSWORD': env('POSTGRES_DB_PASSWORD'),
+            }
+        }
+           
+    elif env('MYSQL_DB_HOST', default=None) is not None:
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.mysql',
@@ -143,7 +154,6 @@ else:
                 'NAME': env('MYSQL_DATABASE'),
                 'PASSWORD': env('MYSQL_PASSWORD'),
                 'OPTIONS': {
-                    'autocommit': True,
                     'charset': 'utf8mb4',
                 },
             }
