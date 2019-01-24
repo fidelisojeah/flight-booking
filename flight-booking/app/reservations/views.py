@@ -67,6 +67,16 @@ class ReservationViewSet(ViewSet):
             status=status.HTTP_201_CREATED
         )
 
+    @decorators.action(detail=True, methods=['get'], url_path='email')
+    def send_reservation_email(self, request, **kwargs):
+        return Response(
+            reservation_services.send_reservation_email(
+                request.user,
+                kwargs.get('pk')
+            ),
+            message='Email Sent!.'
+        )
+
     @decorators.action(detail=False, methods=['get'], url_path='(?P<year>[1-2][0-9][0-9][0-9])')
     def filter_reservations_by_year(self, request, **kwargs):
         '''

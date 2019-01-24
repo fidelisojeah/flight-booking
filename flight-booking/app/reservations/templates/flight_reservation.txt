@@ -1,0 +1,30 @@
+Hi! {{ reservation.author.get_full_name }},
+
+{{ email_information }}
+
+Your reservation with flight Number: {{ flight.get_flight_designation }} is scheduled for departure within the next 24 hours
+
+Reservation Details:
+
+Flight {% if reservation.return_flight %}1{% endif %}
+{{reservation.first_flight.expected_departure|date:'l S F, Y'}}:
+
+
+{{reservation.first_flight.departure_airport.code}} TO {{reservation.first_flight.arrival_airport.code}}
+({{reservation.first_flight.expected_departure|date:'h:i'}} {{ reservation.first_flight.expected_departure|date:'A' }}) TO  ({{ reservation.first_flight.expected_arrival|date:'h:i' }} {{ reservation.first_flight.expected_arrival|date:'A' }})
+
+Class: {{ reservation.get_flight_class_display }}
+
+{% if reservation.return_flight %}
+Flight 2
+{{reservation.return_flight.expected_departure|date:'l S F, Y'}}:
+
+
+{{reservation.return_flight.departure_airport.code}} TO {{reservation.return_flight.arrival_airport.code}}
+({{reservation.return_flight.expected_departure|date:'h:i'}} {{ reservation.return_flight.expected_departure|date:'A' }}) TO  ({{ reservation.first_flight.expected_arrival|date:'h:i' }} {{ reservation.first_flight.expected_arrival|date:'A' }})
+
+Class: {{ reservation.get_flight_class_display }}
+
+{% endif %}
+
+Regards,

@@ -36,7 +36,12 @@ CELERY_ACCEPT_CONTENT
 CELERY_TASK_SERIALIZER
 CELERY_RESULT_SERIALIZER
 CELERY_TIMEZONE
+EMAIL_SERVER
+EMAIL_PORT defaults to 587
+EMAIL_USERNAME
+EMAIL_PASSWORD
 
+EMAIL_DOMAIN_URL
 ```
 
 If you have REDIS as your backend, include the `REDIS_URL` in your environment variables
@@ -59,6 +64,7 @@ To run the application:
 - add the following environment environment variables:
 
 ```env
+APP_URL
 DEBUG=on
 SECRET
 DATABASE_URL
@@ -68,7 +74,15 @@ CELERY_ACCEPT_CONTENT
 CELERY_TASK_SERIALIZER
 CELERY_RESULT_SERIALIZER
 CELERY_TIMEZONE
+EMAIL_SERVER
+EMAIL_PORT defaults to 587
+EMAIL_USERNAME
+EMAIL_PASSWORD
+
+EMAIL_DOMAIN_URL
 ```
+
+You likely want to use a mail trap for your development environment
 
 `DATABASE_URL` can be: `postgres://<username>:<password@>host>:<port>/schema`
 
