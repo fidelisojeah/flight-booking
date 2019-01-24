@@ -6,15 +6,15 @@ services:
   redis-server:
     image: redis:5.0.3
   database:
-    image: percona/percona-server:5.7
+    image: postgres
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
     restart: always
     volumes:
-      - './infrastructure/data/db/mysql:/var/lib/mysql'
+      - './infrastructure/data/db/postgresql:/var/lib/postgresql/data'
 
   django-app:
     build: './flight-booking'
@@ -25,11 +25,7 @@ services:
       - '8000:8000'
     environment:
       - DJANGO_MANAGEPY_MIGRATE=on
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_DB_HOST=database
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - DATABASE_URL={DATABASE_URL}
       - DEBUG=${APP_DEBUG}
       - SECRET_KEY=${APP_SECRET_KEY}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}

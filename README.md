@@ -11,7 +11,7 @@ Before you install:
 
 Ensure you have RabbitMQ up and running on your computer (You could use Redis or both together with Redis as your backend)
 
-Ensure you have MySQL up and running on your computer and create a new database schema and new user with a password and login
+Ensure you have MySQL or PostgreSQL up and running on your computer and create a new database schema and new user with a password and login
 
 > The Name of the database, user and password must be consitient with what is used in your [environment variables]  (in-a-development-environment)
 
@@ -29,10 +29,7 @@ For Installation in a development environment, check the docs at [Flight-booking
 
 ```env
 APP_SECRET_KEY
-MYSQL_DATABASE
-MYSQL_ROOT_PASSWORD
-MYSQL_USER
-MYSQL_PASSWORD
+DATABASE_URL
 CLOUDINARY_URL
 CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT
@@ -64,10 +61,7 @@ To run the application:
 ```env
 DEBUG=on
 SECRET
-MYSQL_USER
-MYSQL_DATABASE
-MYSQL_PASSWORD
-MYSQL_DB_HOST
+DATABASE_URL
 CLOUDINARY_URL
 CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT
@@ -75,6 +69,8 @@ CELERY_TASK_SERIALIZER
 CELERY_RESULT_SERIALIZER
 CELERY_TIMEZONE
 ```
+
+`DATABASE_URL` can be: `postgres://<username>:<password@>host>:<port>/schema`
 
 > Sample of these can be found in the [example](flight-booking/.env.sample)
 

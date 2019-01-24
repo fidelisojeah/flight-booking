@@ -15,7 +15,7 @@ import sys
 import environ
 
 import django_heroku
-
+import dj_database_url
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -134,30 +134,10 @@ if IS_TEST:
     }
     DEBUG = False
 else:
-    if env('POSTGRES_DB_HOST', default=None) is not None:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'HOST': env('POSTGRES_DB_HOST'),
-                'USER': env('POSTGRES_DB_USER'),
-                'NAME': env('POSTGRES_DB_NAME'),
-                'PASSWORD': env('POSTGRES_DB_PASSWORD'),
-            }
-        }
-           
-    elif env('MYSQL_DB_HOST', default=None) is not None:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.mysql',
-                'HOST': env('MYSQL_DB_HOST'),
-                'USER': env('MYSQL_USER'),
-                'NAME': env('MYSQL_DATABASE'),
-                'PASSWORD': env('MYSQL_PASSWORD'),
-                'OPTIONS': {
-                    'charset': 'utf8mb4',
-                },
-            }
-        }
+    DATABASE_URL = env('DATABASE_URL', default=None)
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL)
+    }
 
 
 # Password validation
@@ -256,5 +236,5 @@ CELERY_RESULT_BACKEND = env('REDIS_URL', default='rpc://')
 
 MAX_IMAGE_UPLOAD_SIZE = env('MAX_IMAGE_UPLOAD_SIZE', default=5242880)
 
-if not IS_TEST:
+if (not IS_TEST) and (not DEBUG):
     django_heroku.settings(locals())
