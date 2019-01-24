@@ -1252,6 +1252,13 @@
                                                                 </tr>
                                                             </tbody>
                                                         </table>
+                                                        <table class="spacer" style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: left; vertical-align: top; width: 100%;">
+                                                            <tbody>
+                                                                <tr style="padding: 0; text-align: left; vertical-align: top;">
+                                                                    <td height="16px" style="font-size:16px;line-height:16px;">&nbsp;</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
 
                                                         <table class="row" style="border-collapse: collapse; border-spacing: 0; display: table; padding: 0; position: relative; text-align: left; vertical-align: top; width: 100%;">
                                                             <tbody>
@@ -1312,10 +1319,10 @@
                                                                                                             </tbody>
                                                                                                         </table>
                                                                                                         <span style="font-size:27px; color:#1E1E1E">
-                                                                                                            {{reservation.first_flight.expected_departure|date:'h:i'}}
+                                                                                                            {{ reservation.first_flight.expected_departure|date:'h:i' }}
                                                                                                         </span>&nbsp;
                                                                                                         <span style="font-size:16px; color:#36495A">
-                                                                                                            {{reservation.first_flight.expected_departure|date:'A'}}
+                                                                                                            {{ reservation.first_flight.expected_departure|date:'A' }}
                                                                                                         </span>
                                                                                                     </td>
                                                                                                     <td style="font-size:27px;color:#1e1e1e;">
@@ -1331,10 +1338,10 @@
                                                                                                             </tbody>
                                                                                                         </table>
                                                                                                         <span style="font-size:27px; color:#1E1E1E">
-                                                                                                        {{reservation.first_flight.expected_arrival|date:'h:i'}}
+                                                                                                        {{ reservation.first_flight.expected_arrival|date:'h:i' }}
                                                                                                         </span>&nbsp;
                                                                                                         <span style="font-size:16px; color:#36495A">
-                                                                                                            {{reservation.first_flight.expected_arrival|date:'A'}}
+                                                                                                            {{ reservation.first_flight.expected_arrival|date:'A' }}
                                                                                                         </span>
 
                                                                                                     </td>
@@ -1397,12 +1404,13 @@
                                                                                                 </tr>
                                                                                                 <tr>
                                                                                                     <td>Class:</td>
-                                                                                                    <td>{{ reservation.flight_class }}
+                                                                                                    <td>{{ reservation.get_flight_class_display }}
                                                                                                     </td>
                                                                                                 </tr>
                                                                                                 <tr>
-                                                                                                    <td>Meals:</td>
-                                                                                                    <td></td>
+                                                                                                    <td>Ticket Type:</td>
+                                                                                                    <td>{{ reservation.get_ticket_type_display }}
+                                                                                                    </td>
                                                                                                 </tr>
                                                                                             </tbody>
                                                                                         </table>
@@ -1629,13 +1637,13 @@
                                                                                                 </tr>
                                                                                                 <tr>
                                                                                                     <td>Class:</td>
-                                                                                                    <td>{{ reservation.flight_class }}
+                                                                                                    <td>{{ reservation.get_flight_class_display }}
 
                                                                                                     </td>
                                                                                                 </tr>
                                                                                                 <tr>
-                                                                                                    <td>Meals:</td>
-                                                                                                    <td></td>
+                                                                                                    <td>Ticket Type:</td>
+                                                                                                    <td>{{reservation.get_ticket_type_display}}</td>
                                                                                                 </tr>
                                                                                             </tbody>
                                                                                         </table>

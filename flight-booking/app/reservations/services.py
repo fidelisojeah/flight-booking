@@ -9,12 +9,13 @@ from rest_framework import (
     exceptions,
     pagination
 )
-from .serializers import (
+from app.reservations.serializers import (
     FlightSchedulerSerializer,
     FlightSerializer,
     ReservationSerializer,
     AirlineSerializer
 )
+from app.reservations import tasks
 
 from app.accounts.models import Accounts
 
@@ -352,8 +353,8 @@ def filter_reservations_by_period(requestor, *, month, year, query_params, perio
     return reservations
 
 
-def retrieve_reservation(requestor, *, reservation_pk, query_params):
-    '''Retrieve single Reservation'''
+def _retrieve_single_reservation_(requestor, reservation_pk):
+    '''Retrieve SIngle Reservation Infop, check permissions'''
     reservation = generics.get_object_or_404(Reservation, pk=reservation_pk)
 
     if requestor.has_perm('reservations.retrieve_any_reservations'):
@@ -364,6 +365,12 @@ def retrieve_reservation(requestor, *, reservation_pk, query_params):
     else:
         raise exceptions.PermissionDenied('Insufficient Permission.')
 
+    return reservation
+
+
+def retrieve_reservation(requestor, *, reservation_pk, query_params):
+    '''Retrieve single Reservation'''
+    reservation = _retrieve_single_reservation_(requestor, reservation_pk)
     return ReservationSerializer(reservation).data
 
 
@@ -375,3 +382,12 @@ def filter_airlines(requestor, query_params):
     airlines = Airline.objects.all()
 
     return airlines
+
+
+def send_reservation_email(requestor, reservation_pk):
+    '''Send Reservation Email'''
+    reservation = _retrieve_single_reservation_(requestor, reservation_pk)
+
+    tasks.send_reservation_information.delay(reservation.id)
+
+    return ReservationSerializer(reservation).data

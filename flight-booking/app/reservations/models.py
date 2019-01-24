@@ -142,6 +142,7 @@ class Reservation(models.Model):
         related_name='%(class)s_return',
         on_delete=models.CASCADE
     )
+    is_reminder_sent = models.BooleanField(default=False)
     RETURN = 0
     ONE_WAY = 1
 
