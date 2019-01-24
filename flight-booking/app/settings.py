@@ -134,7 +134,7 @@ if IS_TEST:
     }
     DEBUG = False
 else:
-    if env('POSTGRES_DB_HOST, default=None) is not None:
+    if env('POSTGRES_DB_HOST', default=None) is not None:
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
