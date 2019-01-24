@@ -60,7 +60,6 @@ def handle_exceptions(exc, context):
             data={'detail': 'cloudinary Error'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-        # print('\n\nCLOUDINARY ERROR:{}\n\n'.format(exc))
         errors = {
             'global': 'An issue has occured with our cloudinary service.'
         }

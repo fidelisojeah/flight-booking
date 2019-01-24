@@ -25,9 +25,6 @@ def _validate_schedule_details_(data, airline_code):
     '''Validate Schedule details (used by both daily and weekly)'''
     schedule_details = data.copy()
 
-    if isinstance(data.get('flight_type'), int):
-        schedule_details['flight_type'] = [data.get('flight_type')]
-
     schedule_serializer = FlightSchedulerSerializer(data=schedule_details)
 
     schedule_serializer.is_valid(raise_exception=True)
@@ -91,7 +88,7 @@ def schedule_flight(requestor, *, airline_code, data):
 
     airline = generics.get_object_or_404(Airline, pk=airline_code)
 
-    flight_details['airline'] = airline
+    flight_details['airline'] = airline.code
 
     serializer = FlightSerializer(data=flight_details)
 
@@ -288,7 +285,8 @@ def filter_reservations(requestor, query_params, *, account_pk=None):
             return_flight__expected_departure__contains=filter_date
         ))
 
-    return ReservationSerializer(reservations, many=True).data
+    # return ReservationSerializer(reservations, many=True).data
+    return reservations
 
 
 def filter_flight_reservations(requestor, flight_pk):
@@ -351,7 +349,7 @@ def filter_reservations_by_period(requestor, *, month, year, query_params, perio
         return_flight__expected_departure__range=[start_range, end_range]
     ))
 
-    return ReservationSerializer(reservations, many=True).data
+    return reservations
 
 
 def retrieve_reservation(requestor, *, reservation_pk, query_params):

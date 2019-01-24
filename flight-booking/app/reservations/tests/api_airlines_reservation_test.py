@@ -1,4 +1,6 @@
 import uuid
+from datetime import timedelta
+from django.utils import timezone
 
 from django.contrib.auth.models import User
 from rest_framework.reverse import reverse
@@ -30,14 +32,14 @@ class AirlineSchedule(APITestCase):
             user_type='super_staff'
         )
         self.single_flight_schedule = {
-            'expected_departure': '07:00:00',
-            'expected_arrival': '07:00:00',
+            'expected_departure': timezone.now() + timedelta(hours=2),
+            'expected_arrival': timezone.now() + timedelta(hours=12),
             'departure_airport': 'JFK',
             'arrival_airport': 'ATL',
             'flight_number': '001a',
         }
         self.flight_schedule = {
-            'period': '12',
+            'period': 12,
             'time_of_flight': '17:00:00',
             'flight_duration': '6:00:00',
             'departure_airport': 'LHR',
@@ -309,7 +311,7 @@ class AirlineScheduleExceptions(AirlineSchedule):
                 'airlines-daily-schedule',
                 kwargs={
                     'version': 'v1',
-                    'pk': 'VA'
+                    'pk': 'VS'
                 }
             ),
             data=flight_data,
@@ -584,4 +586,109 @@ class AirlineScheduleExceptions(AirlineSchedule):
         self.assertEqual(
             response.data.get('errors').get('flight_duration')['type'],
             'invalid'
+        )
+
+
+class AirlineScheduleValid(AirlineSchedule):
+    '''AirlineSchedule - Valid'''
+    def test_schedule_airline_single_flight(self):
+        '''Schedule Single Flight for Airline - Valid :- When information provided okay'''
+        flight_data = self.single_flight_schedule
+        response = self.client.post(
+            reverse(
+                'airlines-schedule',
+                kwargs={
+                    'version': 'v1',
+                    'pk': 'VS'
+                }
+            ),
+            data=flight_data,
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            payload.get('flight_designation'),
+            'VS{}'.format(flight_data.get('flight_number'))
+        )
+
+        self.assertEqual(
+            payload.get('departure_airport'), flight_data.get(
+                'departure_airport')
+        )
+        self.assertEqual(
+            payload.get('arrival_airport'), flight_data.get(
+                'arrival_airport')
+        )
+
+    def test_schedule_airline_daily_flights(self):
+        '''Create Daily Schedule Flight for Airline - Valid :- When Information Complete'''
+        schedule_flight_data = self.flight_schedule
+        response = self.client.post(
+            reverse(
+                'airlines-daily-schedule',
+                kwargs={
+                    'version': 'v1',
+                    'pk': 'BA'
+                }
+            ),
+            data=schedule_flight_data,
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            payload[0].get('flight_designation'),
+            'BA{}'.format(schedule_flight_data.get('flight_number'))
+        )
+        self.assertEqual(
+            len(payload), schedule_flight_data.get('period')
+        )
+        self.assertEqual(
+            payload[0].get('departure_airport'), schedule_flight_data.get(
+                'departure_airport')
+        )
+        self.assertEqual(
+            payload[0].get('arrival_airport'), schedule_flight_data.get(
+                'arrival_airport')
+        )
+
+    def test_schedule_airline_weekly_flights(self):
+        '''Create Weekly Schedule Flight for Airline - Valid :- When Information Complete'''
+        schedule_flight_data = self.flight_schedule
+        response = self.client.post(
+            reverse(
+                'airlines-weekly-schedule',
+                kwargs={
+                    'version': 'v1',
+                    'pk': 'DL'
+                }
+            ),
+            data=schedule_flight_data,
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+        payload = response.data.get('payload')
+
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            payload[0].get('flight_designation'),
+            'DL{}'.format(schedule_flight_data.get('flight_number'))
+        )
+        self.assertEqual(
+            payload[0].get('departure_airport'), schedule_flight_data.get(
+                'departure_airport')
+        )
+        self.assertEqual(
+            payload[0].get('arrival_airport'), schedule_flight_data.get(
+                'arrival_airport')
+        )
+        self.assertEqual(
+            len(payload), schedule_flight_data.get('period')
         )

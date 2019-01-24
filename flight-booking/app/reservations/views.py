@@ -63,7 +63,8 @@ class ReservationViewSet(ViewSet):
             reservation_services.make_own_reservation(
                 request.user,
                 data=request.data
-            )
+            ),
+            status=status.HTTP_201_CREATED
         )
 
     @decorators.action(detail=False, methods=['get'], url_path='(?P<year>[1-2][0-9][0-9][0-9])')
@@ -72,13 +73,18 @@ class ReservationViewSet(ViewSet):
         get:
         Filter Reservations by year
         '''
+        reservations = reservation_services.filter_reservations_by_period(
+            request.user,
+            month=0,
+            period='year',
+            year=kwargs.get('year', 0),
+            query_params=request.query_params
+        )
         return Response(
-            reservation_services.filter_reservations_by_period(
-                request.user,
-                month=0,
-                period='year',
-                year=kwargs.get('year', 0),
-                query_params=request.query_params
+            paginate(
+                serializer=reservation_serializers.ReservationSerializer,
+                query_set=reservations,
+                request=request,
             )
         )
 
@@ -88,13 +94,19 @@ class ReservationViewSet(ViewSet):
         get:
         Filter Reservations by year and month extra queries: flight_number, date
         '''
+        reservations = reservation_services.filter_reservations_by_period(
+            request.user,
+            month=kwargs.get('month', 0),
+            period='month',
+            year=kwargs.get('year', 0),
+            query_params=request.query_params
+        )
+
         return Response(
-            reservation_services.filter_reservations_by_period(
-                request.user,
-                month=kwargs.get('month', 0),
-                period='month',
-                year=kwargs.get('year', 0),
-                query_params=request.query_params
+            paginate(
+                serializer=reservation_serializers.ReservationSerializer,
+                query_set=reservations,
+                request=request,
             )
         )
 
@@ -110,12 +122,19 @@ class AccountReservationViewSet(ViewSet):
         Create Reservation For account based on account id
         '''
         if request.method == 'GET':
+            reservations = reservation_services.filter_reservations(
+                request.user,
+                request.query_params,
+                account_pk=kwargs.get('pk')
+            )
+
             return Response(
-                reservation_services.filter_reservations(
-                    request.user,
-                    request.query_params,
-                    account_pk=kwargs.get('pk')
+                paginate(
+                    serializer=reservation_serializers.ReservationSerializer,
+                    query_set=reservations,
+                    request=request
                 )
+
             )
         if request.method == 'POST':
             return Response(
@@ -123,7 +142,9 @@ class AccountReservationViewSet(ViewSet):
                     request.user,
                     account_pk=kwargs.get('pk'),
                     data=request.data
-                )
+                ),
+                status=status.HTTP_201_CREATED,
+                message='Reservation made Successfully.'
             )
 
 

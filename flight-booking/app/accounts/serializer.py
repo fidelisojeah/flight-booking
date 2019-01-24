@@ -129,4 +129,4 @@ class CompactAccountsViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Accounts
-        fields = ('full_name', 'user_name')
+        fields = ('full_name', 'user_name', 'id')

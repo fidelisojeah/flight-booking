@@ -460,3 +460,112 @@ class ReservationExceptions(ReservationTests):
             response.data.get('errors').get('first_flight')['type'],
             'invalid'
         )
+
+
+class ReservationExceptions(ReservationTests):
+    '''Reservations tests - Valid'''
+
+    def test_make_reservation(self):
+        '''Make Reservation For self - Valid :- When Information is Valid'''
+        reservation_data = self.valid_reservation_data
+        response = self.client.post(
+            reverse(
+                'reservations-list',
+                kwargs={
+                    'version': 'v1',
+                }
+            ),
+            data=reservation_data,
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+        )
+        self.assertTrue(response.data.get('success'))
+
+        payload = response.data.get('payload')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(
+            payload.get('flight_class'), reservation_data.get('flight_class')
+        )
+        self.assertEqual(
+            payload.get('reserved_by').get('full_name'),
+            '{} {}'.format(self.user.first_name, self.user.last_name)
+        )
+        self.assertEqual(
+            response.data.get('message'),
+            'Created Successfully.'
+        )
+
+    def test_list_flights(self):
+        '''List/Filter All Reservations - Valid :- Payload correct'''
+        response = self.client.get(
+            reverse(
+                'reservations-list',
+                kwargs={
+                    'version': 'v1',
+                }
+            ),
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+
+        payload = response.data.get('payload')
+
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            payload.get('count'), 2
+        )
+        self.assertEqual(
+            len(payload.get('results')), 2
+        )
+
+    def test_list_flights_by_year(self):
+        '''List/Filter Reservations by Year- Valid :- Payload correct'''
+        response = self.client.get(
+            reverse(
+                'reservations-filter-reservations-by-year',
+                kwargs={
+                    'version': 'v1',
+                    'year': '2019'
+                }
+            ),
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+
+        payload = response.data.get('payload')
+
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            payload.get('count'), 2
+        )
+        self.assertEqual(
+            len(payload.get('results')), 2
+        )
+
+    def test_list_flights_by_month(self):
+        '''List/Filter Reservations by Month - Valid :- Payload correct'''
+        response = self.client.get(
+            reverse(
+                'reservations-filter-reservations-by-month',
+                kwargs={
+                    'version': 'v1',
+                    'year': 2019,
+                    'month': 1
+                }
+            ),
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+
+        payload = response.data.get('payload')
+
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            payload.get('count'), 2
+        )
+        self.assertEqual(
+            len(payload.get('results')), 2
+        )
