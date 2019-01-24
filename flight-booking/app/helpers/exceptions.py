@@ -21,7 +21,6 @@ def handle_exceptions(exc, context):
     if isinstance(exc, utils.FieldErrorExceptions):
         errors = exc.detail
     else:
-
         if hasattr(exc, 'detail'):
             errors = {
                 'global': str(exc.detail)
@@ -34,7 +33,18 @@ def handle_exceptions(exc, context):
     if isinstance(exc, exceptions.ValidationError):
         errors.pop('global', None)
         for key, value in exc.detail.items():
-            if isinstance(value, list):
+            if isinstance(value, dict):
+                errors[key] = {
+                }
+                for _key, _value in value.items():
+                    if isinstance(_value, list):
+
+                        errors[key][_key] = {
+                            'message': str(_value[0]),
+                            'type': _value[0].code
+                        }
+
+            elif isinstance(value, list):
                 errors[key] = {
                     'message': str(value[0]),
                     'type': value[0].code
@@ -50,7 +60,6 @@ def handle_exceptions(exc, context):
             data={'detail': 'cloudinary Error'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-        # print('\n\nCLOUDINARY ERROR:{}\n\n'.format(exc))
         errors = {
             'global': 'An issue has occured with our cloudinary service.'
         }

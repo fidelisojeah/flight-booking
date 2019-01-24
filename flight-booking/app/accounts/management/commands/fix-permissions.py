@@ -27,23 +27,46 @@ class Command(BaseCommand):
 
             for each_model, each_permission in group_permissions:
                 try:
-                    new_group.permissions.add(
-                        Permission.objects.get(codename=each_permission)
+                    permission = Permission.objects.get(
+                        codename=each_permission,
                     )
-                except Permission.DoesNotExist:
+
+                    new_group.permissions.add(
+                        permission
+                    )
+                    print('Adding Permission {}.{} to Group {} | {}'.format(
+                        permission.content_type.name,
+                        permission.codename,
+                        new_group,
+                        permission.name
+                    ))
+                except Exception as exc:
+                    print('Error Occured: ', exc)
                     pass
             if group == 'client':
                 for user in User.objects.filter(
                     account__user_type=Accounts.CLIENT
                 ):
                     user.groups.add(new_group)
+                    print('Adding User {} to Group {} '.format(
+                        user.first_name,
+                        group,
+                    ))
             if group == 'staff':
                 for user in User.objects.filter(
                     account__user_type=Accounts.STAFF
                 ):
                     user.groups.add(new_group)
+                    print('Adding User {} to Group {} '.format(
+                        user.first_name,
+                        group,
+                    ))
             if group == 'super_staff':
                 for user in User.objects.filter(
                     account__user_type=Accounts.SUPER_STAFF
                 ):
                     user.groups.add(new_group)
+                    print('Adding User {} to Group {} '.format(
+                        user.first_name,
+                        group,
+                    ))

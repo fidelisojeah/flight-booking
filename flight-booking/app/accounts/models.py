@@ -30,6 +30,7 @@ class Accounts(models.Model):
     profile_picture_public_id = models.TextField(default='')
 
     user_type = models.IntegerField(default=CLIENT, choices=USER_TYPES)
+    passport_number = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         permissions = (
@@ -45,3 +46,6 @@ class Accounts(models.Model):
         if not self.profile_picture_url or self.profile_picture_public_id == 'profiles/default':
             return default_pic_details()
         return self.profile_picture_url
+
+    def get_full_name(self):
+        return '{} {}'.format(self.user.first_name, self.user.last_name)

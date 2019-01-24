@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'app.accounts',
     'app.helpers',
     'app.uploads',
+    'app.reservations',
 ]
 
 MIDDLEWARE = [
@@ -133,19 +134,20 @@ if IS_TEST:
     }
     DEBUG = False
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'mysql.connector.django',
-            'HOST': env('MYSQL_DB_HOST'),
-            'USER': env('MYSQL_USER'),
-            'NAME': env('MYSQL_DATABASE'),
-            'PASSWORD': env('MYSQL_PASSWORD'),
-            'OPTIONS': {
-                'autocommit': True,
-                'charset': 'utf8mb4',
-            },
+    if env('MYSQL_DB_HOST', default=None) is not None:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.mysql',
+                'HOST': env('MYSQL_DB_HOST'),
+                'USER': env('MYSQL_USER'),
+                'NAME': env('MYSQL_DATABASE'),
+                'PASSWORD': env('MYSQL_PASSWORD'),
+                'OPTIONS': {
+                    'autocommit': True,
+                    'charset': 'utf8mb4',
+                },
+            }
         }
-    }
 
 
 # Password validation
@@ -230,7 +232,7 @@ CELERY_ACCEPT_CONTENT = ['json', 'application/text', 'pickle', 'msgpack', 'yaml'
 CELERY_ACKS_LATE = True
 CELERY_TASK_PUBLISH_RETRY = True
 CELERY_DISABLE_RATE_LIMITS = False
-CELERY_BROKER_POOL_LIMIT = 1
+CELERY_BROKER_POOL_LIMIT = env('CELERY_BROKER_POOL_LIMIT', default=1)
 
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default=None)
 if CELERY_BROKER_URL is None:

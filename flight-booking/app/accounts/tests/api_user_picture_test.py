@@ -1,7 +1,7 @@
 import uuid
 from PIL import Image
 from io import BytesIO
-from django.core.files.base import ContentFile
+
 from django.contrib.auth.models import User
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase

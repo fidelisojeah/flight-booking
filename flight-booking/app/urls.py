@@ -19,4 +19,5 @@ from django.urls import path, include, re_path
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path('api/(?P<version>(v[0-9]))/', include('app.accounts.urls')),
+    re_path('api/(?P<version>(v[0-9]))/', include('app.reservations.urls')),
 ]
