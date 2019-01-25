@@ -762,4 +762,4 @@ class AirlineScheduleValid(AirlineSchedule):
         )
         payload = response.data.get('payload')
         self.assertTrue(response.data.get('success'))
-        self.assertGreaterEqual(payload.get('count'), 1)
+        self.assertGreaterEqual(len(payload), 1)
