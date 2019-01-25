@@ -75,6 +75,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'bugsnag.django.middleware.BugsnagMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -245,6 +246,27 @@ EMAIL_USE_TLS = True
 EMAIL_DOMAIN_URL = env('EMAIL_DOMAIN_URL', default='localhost')
 
 APP_URL = env('APP_URL', default='https://localhost')
+
+BUGSNAG = {
+    'api_key': env('BUGSNAG_API_KEY', default=''),
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'root': {
+        'level': 'ERROR',
+        'handlers': ['bugsnag'],
+    },
+
+    'handlers': {
+        'bugsnag': {
+            'level': 'INFO',
+            'class': 'bugsnag.handlers.BugsnagHandler',
+        },
+    }
+}
 
 if (not IS_TEST) and (not DEBUG):
     django_heroku.settings(locals())

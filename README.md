@@ -3,7 +3,9 @@
 [![CircleCI](https://circleci.com/gh/fidelisojeah/flight-booking.svg?style=svg)](https://circleci.com/gh/fidelisojeah/flight-booking)
 
 Flight Booking Application
+
 API at: [https://flight-booking-lms.herokuapp.com](<https://flight-booking-lms.herokuapp.com>)
+
 ## Installation and configuration
 
 ### In a Development Environment
@@ -43,7 +45,10 @@ EMAIL_USERNAME
 EMAIL_PASSWORD
 
 EMAIL_DOMAIN_URL
+BUGSNAG_API_KEY
 ```
+
+Include the `BUGSNAG_API_KEY` if tracking application errors
 
 If you have REDIS as your backend, include the `REDIS_URL` in your environment variables
 
@@ -81,6 +86,7 @@ EMAIL_USERNAME
 EMAIL_PASSWORD
 
 EMAIL_DOMAIN_URL
+BUGSNAG_API_KEY
 ```
 
 You likely want to use a mail trap for your development environment
