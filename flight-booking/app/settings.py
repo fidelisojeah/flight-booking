@@ -125,8 +125,6 @@ WSGI_APPLICATION = 'app.wsgi.application'
 IS_TEST = (len(sys.argv) > 1 and sys.argv[1] == 'test') or env(
     'CIRCLECI', default=False)
 if IS_TEST:
-    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-    EMAIL_FILE_PATH = './results/app-messages'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

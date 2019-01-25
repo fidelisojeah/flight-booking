@@ -359,3 +359,39 @@ class AccountReservationExceptions(AccountReservation):
             response.data.get('errors').get('first_flight')['type'],
             'invalid'
         )
+
+
+class AccountReservationValid(AccountReservation):
+    '''Make reservations By account'''
+
+    def test_book_single_flight_for_user(self):
+        '''Book Flight for User Account - Valid :- '''
+        reservation_data = self.valid_reservation_data.copy()
+
+        response = self.client.post(
+            reverse(
+                'account-reservations-reservations',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.user.account.id,
+                }
+            ),
+            data=reservation_data,
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+        )
+        self.assertTrue(response.data.get('success'))
+
+        payload = response.data.get('payload')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(
+            payload.get('flight_class'), reservation_data.get('flight_class')
+        )
+        self.assertEqual(
+            payload.get('reserved_by').get('full_name'),
+            '{} {}'.format(self.user.first_name, self.user.last_name)
+        )
+        self.assertEqual(
+            response.data.get('message'),
+            'Reservation made Successfully.'
+        )

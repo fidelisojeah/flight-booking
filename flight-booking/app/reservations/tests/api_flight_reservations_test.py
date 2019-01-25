@@ -1,4 +1,6 @@
 import uuid
+from django.utils import timezone
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from rest_framework.reverse import reverse
@@ -10,7 +12,7 @@ from django.test import override_settings, utils as django_utils
 
 from app.accounts.tests import factory as user_factory
 
-from app.reservations.tests.factory import create_return_flight
+from app.reservations.tests.factory import create_return_flight, make_reservation_single
 
 from app.helpers import utils
 from app.reservations.models import (
@@ -263,4 +265,84 @@ class FlightReservationExceptions(FlightReservation):
         self.assertEqual(
             response.data.get('errors').get('first_flight')['type'],
             'invalid'
+        )
+
+
+class FlightReservationValid(FlightReservation):
+    '''When Calls are valid'''
+
+    def test_list_flights_no_query_params(self):
+        '''List/Filter Flights - Valid :- No filter'''
+        response = self.client.get(
+            reverse(
+                'flights-list',
+                kwargs={
+                    'version': 'v1',
+                }
+            ),
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+
+        )
+        payload = response.data.get('payload')
+
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            len(payload), 2
+        )
+
+    def test_list_flights_filter_dates(self):
+        '''List/Filter Flights - Valid :-Filter by Dates'''
+        response = self.client.get(
+            reverse(
+                'flights-list',
+                kwargs={
+                    'version': 'v1',
+                }
+            ),
+            data={
+                'date': timezone.now() + timedelta(days=1)
+            },
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+
+        )
+        payload = response.data.get('payload')
+
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            len(payload), 2
+        )
+
+    def test_make_reservation_for_flight_no_permission(self):
+        '''Make Reservation for Flight - Invalid :- No permission (not logged in maybe)'''
+        reservation_data = self.valid_reservation_data
+        response = self.client.post(
+            reverse(
+                'flights-reservations',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.flight.id
+                }
+            ),
+            HTTP_AUTHORIZATION=utils.generate_token(self.user),
+            data=reservation_data
+        )
+        self.assertTrue(response.data.get('success'))
+
+        payload = response.data.get('payload')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(
+            payload.get('flight_class'), reservation_data.get('flight_class')
+        )
+        self.assertEqual(
+            payload.get('reserved_by').get('full_name'),
+            '{} {}'.format(self.user.first_name, self.user.last_name)
+        )
+        self.assertEqual(
+            response.data.get('message'),
+            'Reservation made Successfully.'
         )

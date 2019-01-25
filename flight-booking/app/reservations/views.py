@@ -64,7 +64,8 @@ class ReservationViewSet(ViewSet):
                 request.user,
                 data=request.data
             ),
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
+            message='Reservation made Successfully.'
         )
 
     @decorators.action(detail=True, methods=['get'], url_path='email')
@@ -220,7 +221,9 @@ class FlightsViewSet(ViewSet):
                     request.user,
                     flight_pk=kwargs.get('pk'),
                     data=request.data
-                )
+                ),
+                status=status.HTTP_201_CREATED,
+                message='Reservation made Successfully.'
             )
 
 

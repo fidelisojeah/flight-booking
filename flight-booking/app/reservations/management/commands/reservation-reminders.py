@@ -27,7 +27,7 @@ class Command(BaseCommand):
         ).exclude(is_reminder_sent=True)
 
         if not today_reservations.exists():
-            return 'Done! No Upcoming Reservation'
+            return 'Done! No Upcoming Reservations.'
 
         for reservation in today_reservations:
             flight = reservation.first_flight
@@ -65,4 +65,4 @@ class Command(BaseCommand):
             reservation.is_reminder_sent = True
             reservation.save()
 
-        return 'Done! All Reminder Emails sent'
+        return 'Done! All Reminder Emails sent.'
