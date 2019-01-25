@@ -20,8 +20,8 @@ def send_reservation_information(self, reservation_id):
 
         today = timezone.now()
 
-        if reservation.first_flight.expected_departure < today and today_reservations.return_flight:
-            flight = today_reservations.return_flight
+        if reservation.first_flight.expected_departure < today and reservation.return_flight:
+            flight = reservation.return_flight
 
         reservation_url = '/api/v1/reservations/{}/'.format(reservation.id)
         site = settings.APP_URL

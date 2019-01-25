@@ -197,7 +197,6 @@ def retrieve_flight(requestor, flight_pk):
 
 def make_reservation(requestor, *, account_pk, data):
     '''Make Flight Reservations'''
-    # TODO: Ensure reservation is not in the past
     if requestor.has_perm('reservations.create_any_reservation'):
         pass
     elif requestor.has_perm('reservations.add_reservation'):
@@ -355,12 +354,13 @@ def filter_reservations_by_period(requestor, *, month, year, query_params, perio
 
 def _retrieve_single_reservation_(requestor, reservation_pk):
     '''Retrieve SIngle Reservation Infop, check permissions'''
+
     reservation = generics.get_object_or_404(Reservation, pk=reservation_pk)
 
     if requestor.has_perm('reservations.retrieve_any_reservations'):
         pass
     elif requestor.has_perm('reservations.retrieve_own_reservations'):
-        if requestor.account.id != str(reservation.author.id):
+        if requestor.account.id != reservation.author.id:
             raise exceptions.NotFound()
     else:
         raise exceptions.PermissionDenied('Insufficient Permission.')
@@ -380,6 +380,13 @@ def filter_airlines(requestor, query_params):
         raise exceptions.PermissionDenied('Insufficient Permission.')
 
     airlines = Airline.objects.all()
+    code = query_params.get('code', None)
+    if code is not None:
+        airlines = airlines.filter(code__contains=code)
+
+    airline_name = query_params.get('airline_name', None)
+    if airline_name is not None:
+        airlines = airlines.filter(airline_name__contains=airline_name)
 
     return airlines
 

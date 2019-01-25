@@ -219,7 +219,7 @@ class ReservationExceptions(ReservationTests):
                     'pk': self.single_ticket_reservation.id
                 }
             ),
-            HTTP_AUTHORIZATION=utils.generate_token(self.user1)
+            HTTP_AUTHORIZATION=utils.generate_token(self.user2)
         )
         self.assertFalse(response.data.get('success'))
 
@@ -462,7 +462,7 @@ class ReservationExceptions(ReservationTests):
         )
 
 
-class ReservationExceptions(ReservationTests):
+class ReservationValid(ReservationTests):
     '''Reservations tests - Valid'''
 
     def test_make_reservation(self):
@@ -492,10 +492,10 @@ class ReservationExceptions(ReservationTests):
         )
         self.assertEqual(
             response.data.get('message'),
-            'Created Successfully.'
+            'Reservation made Successfully.'
         )
 
-    def test_list_flights(self):
+    def test_list_reservations(self):
         '''List/Filter All Reservations - Valid :- Payload correct'''
         response = self.client.get(
             reverse(
@@ -519,7 +519,7 @@ class ReservationExceptions(ReservationTests):
             len(payload.get('results')), 2
         )
 
-    def test_list_flights_by_year(self):
+    def test_list_reservations_by_year(self):
         '''List/Filter Reservations by Year- Valid :- Payload correct'''
         response = self.client.get(
             reverse(
@@ -544,7 +544,7 @@ class ReservationExceptions(ReservationTests):
             len(payload.get('results')), 2
         )
 
-    def test_list_flights_by_month(self):
+    def test_list_freservations_by_month(self):
         '''List/Filter Reservations by Month - Valid :- Payload correct'''
         response = self.client.get(
             reverse(
@@ -569,3 +569,45 @@ class ReservationExceptions(ReservationTests):
         self.assertEqual(
             len(payload.get('results')), 2
         )
+
+    @django_utils.override_settings(CELERY_ALWAYS_EAGER=True)
+    @patch('app.reservations.tasks.send_reservation_information.delay')
+    def test_retrieve_reservation_by_email(self, mock_celery):
+        '''Retrieve Reservation by Email - Valid : payload correct'''
+        response = self.client.get(
+            reverse(
+                'reservations-send-reservation-email',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.single_ticket_reservation.id,
+                }
+            ),
+            HTTP_AUTHORIZATION=utils.generate_token(self.user1)
+        )
+        payload = response.data.get('payload')
+
+        self.assertTrue(response.data.get('success'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('message'), 'Email Sent!.')
+        self.assertEqual(payload.get('flight_class'),
+                         self.single_ticket_reservation.flight_class)
+
+        self.assertTrue(mock_celery.assert_called_once, 1)
+
+    def test_retrieve_reservation(self):
+        '''Retrieve Reservation - Valid : payload correct'''
+        response = self.client.get(
+            reverse(
+                'reservations-detail',
+                kwargs={
+                    'version': 'v1',
+                    'pk': self.return_ticket_reservation.id,
+                }
+            ),
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+        )
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(payload.get('flight_class'),
+                         self.return_ticket_reservation.flight_class)

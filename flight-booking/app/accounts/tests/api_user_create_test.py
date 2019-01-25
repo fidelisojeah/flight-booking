@@ -398,6 +398,7 @@ class AccountsTestValid(AccountsTest):
     '''Create a new User - VALID :- When data valid'''
 
     def test_create_user_valid_data(self):
+        '''Create a new User - Valid :- '''
         data = self.valid_data.copy()
 
         response = self.client.post(

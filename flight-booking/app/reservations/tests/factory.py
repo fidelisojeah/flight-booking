@@ -1,7 +1,10 @@
 from datetime import timedelta
 from django.utils import timezone
+from django.contrib.auth.models import User
+
 
 from app.reservations.models import Airline, Flight, Airport, Reservation
+from app.accounts.models import Accounts
 
 
 def create_single_flight(*,
@@ -126,6 +129,9 @@ def make_reservation_single(*,
                             user_account,
                             flight,
                             ):
+    if isinstance(user_account, User):
+        user_account = user_account.account
+
     reservation = Reservation.objects.create(
         author=user_account,
         first_flight=flight,

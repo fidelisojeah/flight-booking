@@ -12,6 +12,7 @@ from django.test import override_settings, utils as django_utils
 
 from app.accounts.tests import factory as user_factory
 from app.helpers import utils
+from app.reservations.tests import factory as reservation_factory
 
 
 class AirlineSchedule(APITestCase):
@@ -591,6 +592,59 @@ class AirlineScheduleExceptions(AirlineSchedule):
 
 class AirlineScheduleValid(AirlineSchedule):
     '''AirlineSchedule - Valid'''
+
+    def test_filter_airlines(self):
+        '''Filter list of all Airlines - Valid: No filters'''
+        response = self.client.get(
+            reverse(
+                'airlines-list',
+                kwargs={
+                    'version': 'v1',
+                }
+            ),
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+        self.assertGreaterEqual(payload.get('count'), 1)
+
+    def test_filter_airlines_filter_code(self):
+        '''Filter list of all Airlines - Valid: filter Code'''
+        response = self.client.get(
+            reverse(
+                'airlines-list',
+                kwargs={
+                    'version': 'v1',
+                }
+            ), data={
+                'code': 'BA'
+            },
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+        self.assertEqual(payload.get('count'), 1)
+
+        self.assertEqual(payload.get('results')[0].get(
+            'airline_name'), 'British Airways')
+
+    def test_filter_airlines_filter_name(self):
+        '''Filter list of all Airlines - Valid: filter name'''
+        response = self.client.get(
+            reverse(
+                'airlines-list',
+                kwargs={
+                    'version': 'v1',
+                }
+            ), data={
+                'airline_name': 'Virgin'
+            },
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+        self.assertGreaterEqual(payload.get('count'), 1)
+
     def test_schedule_airline_single_flight(self):
         '''Schedule Single Flight for Airline - Valid :- When information provided okay'''
         flight_data = self.single_flight_schedule
@@ -692,3 +746,20 @@ class AirlineScheduleValid(AirlineSchedule):
         self.assertEqual(
             len(payload), schedule_flight_data.get('period')
         )
+
+    def test_filter_airline_schedule(self):
+        '''List/Filter Airline Flight Schedule - Valid'''
+        reservation_factory.create_single_flight(airline='WT')
+        response = self.client.get(
+            reverse(
+                'airlines-schedule',
+                kwargs={
+                    'version': 'v1',
+                    'pk': 'WT'
+                }
+            ),
+            HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
+        )
+        payload = response.data.get('payload')
+        self.assertTrue(response.data.get('success'))
+        self.assertGreaterEqual(len(payload), 1)
