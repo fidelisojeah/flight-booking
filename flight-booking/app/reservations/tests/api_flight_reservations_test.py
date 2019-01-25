@@ -312,12 +312,57 @@ class FlightReservationValid(FlightReservation):
         self.assertTrue(response.data.get('success'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_flights_filter_by_departure_airport(self):
+        '''List/Filter Flights - Valid :-Filter by Airports (Departure)'''
+        response = self.client.get(
+            reverse(
+                'flights-list',
+                kwargs={
+                    'version': 'v1',
+                }
+            ),
+            data={
+                'from': 'London Heathrow'
+            },
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+
+        )
+        payload = response.data.get('payload')
+
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            len(payload), 2
+            len(payload), 1
         )
 
-    def test_make_reservation_for_flight_no_permission(self):
-        '''Make Reservation for Flight - Invalid :- No permission (not logged in maybe)'''
+    def test_list_flights_filter_by_arrival_airport(self):
+        '''List/Filter Flights - Valid :-Filter by Airports (Arrival)'''
+        response = self.client.get(
+            reverse(
+                'flights-list',
+                kwargs={
+                    'version': 'v1',
+                }
+            ),
+            data={
+                'destination': 'London Heathrow'
+            },
+            HTTP_AUTHORIZATION=utils.generate_token(self.user)
+
+        )
+        payload = response.data.get('payload')
+
+        self.assertTrue(response.data.get('success'))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            len(payload), 1
+        )
+
+    def test_make_reservation_for_flight(self):
+        '''Make Reservation for Flight - Valid'''
         reservation_data = self.valid_reservation_data
         response = self.client.post(
             reverse(
