@@ -64,7 +64,7 @@ def handle_exceptions(exc, context):
         errors = {
             'global': 'An issue has occured with our cloudinary service.'
         }
-    if response.status_code = status.is_server_error:
+    if response.status_code == status.is_server_error:
         bugsnag.notify(exc,
                        context=context,
                        )
