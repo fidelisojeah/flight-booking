@@ -113,7 +113,7 @@ def filter_flights(requestor, *, query_params):
 
     flights = Flight.objects.filter(
         expected_departure__gte=today
-    )
+    ).order_by('expected_departure')
 
     if filter_date is not None:
         if isinstance(filter_date, datetime):
@@ -160,7 +160,7 @@ def retrieve_flight_for_airline(requestor, *, airline_code, query_params):
 
     airline = generics.get_object_or_404(Airline, pk=airline_code)
 
-    flights = airline.flight_airline
+    flights = airline.flight_airline.order_by('expected_departure')
 
     filter_date = query_params.get('date', None)
     filter_flight_number = query_params.get('flight_number', None)
@@ -285,8 +285,7 @@ def filter_reservations(requestor, query_params, *, account_pk=None):
             return_flight__expected_departure__contains=filter_date
         ))
 
-    # return ReservationSerializer(reservations, many=True).data
-    return reservations
+    return reservations.order_by('first_flight__expected_departure')
 
 
 def filter_flight_reservations(requestor, flight_pk):
@@ -349,7 +348,7 @@ def filter_reservations_by_period(requestor, *, month, year, query_params, perio
         return_flight__expected_departure__range=[start_range, end_range]
     ))
 
-    return reservations
+    return reservations.order_by('first_flight__expected_departure')
 
 
 def _retrieve_single_reservation_(requestor, reservation_pk):
@@ -379,7 +378,7 @@ def filter_airlines(requestor, query_params):
     if not requestor.has_perm('reservations.view_airline'):
         raise exceptions.PermissionDenied('Insufficient Permission.')
 
-    airlines = Airline.objects.all()
+    airlines = Airline.objects.all().order_by('code')
     code = query_params.get('code', None)
     if code is not None:
         airlines = airlines.filter(code__contains=code)
