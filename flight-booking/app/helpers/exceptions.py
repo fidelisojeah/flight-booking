@@ -4,6 +4,7 @@ from rest_framework import (
     status,
     response as api_response
 )
+import bugsnag
 from cloudinary import api as cloudinary_api
 from django.conf import settings
 
@@ -63,7 +64,10 @@ def handle_exceptions(exc, context):
         errors = {
             'global': 'An issue has occured with our cloudinary service.'
         }
-
+    if response.status_code = status.is_server_error:
+        bugsnag.notify(exc,
+                       context=context,
+                       )
     if response is not None:
         response.data = {}
         response.data['status_code'] = response.status_code
