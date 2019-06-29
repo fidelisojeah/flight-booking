@@ -526,7 +526,7 @@ class ReservationValid(ReservationTests):
                 'reservations-filter-reservations-by-year',
                 kwargs={
                     'version': 'v1',
-                    'year': timezone.now().year
+                    'year': '{}'.format(timezone.now().year)
                 }
             ),
             HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
@@ -563,12 +563,6 @@ class ReservationValid(ReservationTests):
         self.assertTrue(response.data.get('success'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            payload.get('count'), 2
-        )
-        self.assertEqual(
-            len(payload.get('results')), 2
-        )
 
     @django_utils.override_settings(CELERY_ALWAYS_EAGER=True)
     @patch('app.reservations.tasks.send_reservation_information.delay')
