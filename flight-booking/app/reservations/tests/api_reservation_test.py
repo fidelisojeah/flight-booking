@@ -121,7 +121,7 @@ class ReservationExceptions(ReservationTests):
                 'reservations-filter-reservations-by-year',
                 kwargs={
                     'version': 'v1',
-                    'year': 'timezone.now().year'
+                    'year': timezone.now().year
                 }
             )
         )
@@ -526,7 +526,7 @@ class ReservationValid(ReservationTests):
                 'reservations-filter-reservations-by-year',
                 kwargs={
                     'version': 'v1',
-                    'year': '{}'.format(timezone.now().year)
+                    'year': timezone.now().year
                 }
             ),
             HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
