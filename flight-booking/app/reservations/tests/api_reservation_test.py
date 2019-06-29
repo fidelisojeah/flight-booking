@@ -121,7 +121,7 @@ class ReservationExceptions(ReservationTests):
                 'reservations-filter-reservations-by-year',
                 kwargs={
                     'version': 'v1',
-                    'year': '2019'
+                    'year': timezone.now().year
                 }
             )
         )
@@ -144,7 +144,7 @@ class ReservationExceptions(ReservationTests):
                 'reservations-filter-reservations-by-month',
                 kwargs={
                     'version': 'v1',
-                    'year': 2019,
+                    'year': timezone.now().year,
                     'month': 1
                 }
             )
@@ -168,7 +168,7 @@ class ReservationExceptions(ReservationTests):
                 'reservations-filter-reservations-by-month',
                 kwargs={
                     'version': 'v1',
-                    'year': 2019,
+                    'year': timezone.now().year,
                     'month': 26
                 }
             ),
@@ -526,7 +526,7 @@ class ReservationValid(ReservationTests):
                 'reservations-filter-reservations-by-year',
                 kwargs={
                     'version': 'v1',
-                    'year': '2019'
+                    'year': timezone.now().year
                 }
             ),
             HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
@@ -544,15 +544,15 @@ class ReservationValid(ReservationTests):
             len(payload.get('results')), 2
         )
 
-    def test_list_freservations_by_month(self):
+    def test_list_reservations_by_month(self):
         '''List/Filter Reservations by Month - Valid :- Payload correct'''
         response = self.client.get(
             reverse(
                 'reservations-filter-reservations-by-month',
                 kwargs={
                     'version': 'v1',
-                    'year': 2019,
-                    'month': 1
+                    'year': timezone.now().year,
+                    'month': timezone.now().month
                 }
             ),
             HTTP_AUTHORIZATION=utils.generate_token(self.super_user)
@@ -563,12 +563,6 @@ class ReservationValid(ReservationTests):
         self.assertTrue(response.data.get('success'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            payload.get('count'), 2
-        )
-        self.assertEqual(
-            len(payload.get('results')), 2
-        )
 
     @django_utils.override_settings(CELERY_ALWAYS_EAGER=True)
     @patch('app.reservations.tasks.send_reservation_information.delay')
