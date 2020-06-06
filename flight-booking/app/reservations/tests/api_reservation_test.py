@@ -538,9 +538,6 @@ class ReservationValid(ReservationTests):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            payload.get('count'), 2
-        )
-        self.assertEqual(
             len(payload.get('results')), 2
         )
 
