@@ -537,12 +537,6 @@ class ReservationValid(ReservationTests):
         self.assertTrue(response.data.get('success'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            payload.get('count'), 2
-        )
-        self.assertEqual(
-            len(payload.get('results')), 2
-        )
 
     def test_list_reservations_by_month(self):
         '''List/Filter Reservations by Month - Valid :- Payload correct'''
