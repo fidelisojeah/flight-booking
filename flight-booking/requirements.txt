@@ -31,7 +31,7 @@ psycopg2==2.7.6.1
 psycopg2-binary==2.7.6.1
 pylint==2.7.0
 pytz==2018.7
-redis==3.0.1
+redis==4.4.4
 requests>=2.21.0
 unittest-xml-reporting==2.2.0
 setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
