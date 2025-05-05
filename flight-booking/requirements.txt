@@ -34,4 +34,5 @@ pytz==2018.7
 redis==3.0.1
 requests>=2.21.0
 unittest-xml-reporting==2.2.0
-setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
+setuptools>=78.1.1 # not directly required, pinned by Snyk to avoid a vulnerability
+gevent>=25.4.1 # not directly required, pinned by Snyk to avoid a vulnerability
